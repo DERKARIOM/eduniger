@@ -1,3 +1,4 @@
+import 'package:eduniger/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 
@@ -45,7 +46,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleCreateAccount() {
-    // Navigation vers la page d'inscription
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RegisterPage()),
+    );
   }
 
   @override
