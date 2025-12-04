@@ -43,9 +43,14 @@ class _LoginPageState extends State<LoginPage> {
 
   void _handleForgotPassword() {
     // Navigation vers la page de récupération de mot de passe
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RegisterPage()),
+    );
   }
 
   void _handleCreateAccount() {
+    // Navigation vers la page de creation de code
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterPage()),
