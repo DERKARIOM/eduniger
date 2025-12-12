@@ -12,7 +12,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _phoneController = TextEditingController();
+  late final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String _countryCode = '+227'; // Code Niger par défaut
   String _errorMessage = '';
@@ -35,10 +35,28 @@ class _LoginPageState extends State<LoginPage> {
     Future.delayed(const Duration(seconds: 2), () {
       setState(() {
         _isLoading = false;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MainPage()),
-        );
+        if(_phoneController.text.isEmpty && _passwordController.text.isEmpty) {
+          _errorMessage = "Votre matricule et mot de passe svp";
+          return;
+        }
+        if(_phoneController.text.isEmpty && _passwordController.text.isNotEmpty){
+          _errorMessage = "Votre matricule svp";
+          return;
+        }
+        if(_passwordController.text.isEmpty){
+          _errorMessage = "Votre mot de passe svp";
+          return;
+        }
+        if(_phoneController.text == "94961793" && _passwordController.text == "Password@2025"){
+          _isLoading = true;
+        }
+        if(_isLoading == true)
+        {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MainPage()),
+          );
+        }
       });
     });
   }
@@ -101,6 +119,13 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                     child: Row(
@@ -136,18 +161,29 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 20),
 
                   // Champ mot de passe
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: 'Votre mot de passe ?',
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide.none,
+                  Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'Votre mot de passe ?',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
                       ),
-                      contentPadding: const EdgeInsets.all(16),
                     ),
                   ),
 
