@@ -1,3 +1,5 @@
+import 'package:eduniger/pages/forgot_password_page.dart';
+import 'package:eduniger/pages/main_page.dart';
 import 'package:eduniger/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -33,6 +35,10 @@ class _LoginPageState extends State<LoginPage> {
     Future.delayed(const Duration(seconds: 2), () {
       setState(() {
         _isLoading = false;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainPage()),
+        );
       });
     });
   }
@@ -45,12 +51,12 @@ class _LoginPageState extends State<LoginPage> {
     // Navigation vers la page de récupération de mot de passe
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => RegisterPage()),
+      MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
     );
   }
 
   void _handleCreateAccount() {
-    // Navigation vers la page de creation de code
+    // Navigation vers la page de creation de compte
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterPage()),
