@@ -1,7 +1,8 @@
+import 'package:eduniger/services/login_api.dart';
 import 'package:flutter/material.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({Key? key, User? user}) : super(key: key);
 
   @override
   State<MainPage> createState() => _MainPageState();

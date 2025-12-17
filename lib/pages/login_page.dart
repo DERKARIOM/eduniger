@@ -3,6 +3,9 @@ import 'package:eduniger/pages/main_page.dart';
 import 'package:eduniger/pages/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:eduniger/services/login_api.dart';
+
+import '../services/login_api.dart'; // Importer le service d'authentification
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -25,40 +28,76 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
 
-    // Ajoutez votre logique de connexion ici
-    Future.delayed(const Duration(seconds: 2), () {
+    // Validation des champs
+    if (_phoneController.text.isEmpty && _passwordController.text.isEmpty) {
       setState(() {
         _isLoading = false;
-        if(_phoneController.text.isEmpty && _passwordController.text.isEmpty) {
-          _errorMessage = "Votre matricule et mot de passe svp";
-          return;
-        }
-        if(_phoneController.text.isEmpty && _passwordController.text.isNotEmpty){
-          _errorMessage = "Votre matricule svp";
-          return;
-        }
-        if(_passwordController.text.isEmpty){
-          _errorMessage = "Votre mot de passe svp";
-          return;
-        }
-        if(_phoneController.text == "94961793" && _passwordController.text == "Password@2025"){
-          _isLoading = true;
-        }
-        if(_isLoading == true)
-        {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MainPage()),
-          );
-        }
+        _errorMessage = "Votre matricule et mot de passe svp";
       });
-    });
+      return;
+    }
+
+    if (_phoneController.text.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Votre matricule svp";
+      });
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = "Votre mot de passe svp";
+      });
+      return;
+    }
+
+    try {
+      // Appel à l'API de connexion
+      final result = await AuthService.login(
+        idNumber: _phoneController.text.trim(),
+        password: _passwordController.text,
+        version: '3.1.3', // Version de l'app
+      );
+
+      if (!mounted) return;
+
+      if (result.success && result.user != null) {
+        // Connexion réussie
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Optionnel : Sauvegarder les données utilisateur localement
+        // await SharedPreferences...
+
+        // Navigation vers la page principale
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainPage(user: result.user),
+          ),
+        );
+      } else {
+        // Erreur de connexion
+        setState(() {
+          _isLoading = false;
+          _errorMessage = result.message;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet.';
+      });
+    }
   }
 
   void _handleGoogleLogin() {
@@ -66,7 +105,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleForgotPassword() {
-    // Navigation vers la page de récupération de mot de passe
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ForgotPasswordPage()),
@@ -74,7 +112,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleCreateAccount() {
-    // Navigation vers la page de creation de compte
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => RegisterPage()),
@@ -195,8 +232,8 @@ class _LoginPageState extends State<LoginPage> {
                       child: const Text(
                         'Mot de passe oublié ?',
                         style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
                             decoration: TextDecoration.underline
                         ),
                       ),
@@ -213,6 +250,7 @@ class _LoginPageState extends State<LoginPage> {
                           color: Colors.red,
                           fontSize: 14,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
 
@@ -297,9 +335,9 @@ class _LoginPageState extends State<LoginPage> {
                         child: const Text(
                           'Créer un compte',
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                            decoration: TextDecoration.underline
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                              decoration: TextDecoration.underline
                           ),
                         ),
                       ),
