@@ -194,7 +194,7 @@ class _ChangePasswordPageState extends State<ForgotPasswordPage> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _handleChangePassword,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.app_color,
+                        backgroundColor: Colors.blue,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -218,7 +218,7 @@ class _ChangePasswordPageState extends State<ForgotPasswordPage> {
                   const Text(
                     'Version : 3.1.3',
                     style: TextStyle(
-                      color: Colors.app_color,
+                      color: Colors.blue,
                       fontSize: 14,
                     ),
                   ),

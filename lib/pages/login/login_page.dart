@@ -1,11 +1,11 @@
-import 'package:eduniger/pages/forgot_password_page.dart';
-import 'package:eduniger/pages/main_page.dart';
-import 'package:eduniger/pages/register_page.dart';
+import 'package:eduniger/pages/login/forgot_password_page.dart';
+import 'package:eduniger/pages/bootomBart/main_page.dart';
+import 'package:eduniger/pages/login/register_page.dart';
 import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:eduniger/services/login_api.dart';
 
-import '../services/login_api.dart'; // Importer le service d'authentification
+import '../../services/login_api.dart'; // Importer le service d'authentification
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -20,6 +20,12 @@ class _LoginPageState extends State<LoginPage> {
   String _countryCode = '+227'; // Code Niger par défaut
   String _errorMessage = '';
   bool _isLoading = false;
+  _passeDirectement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MainPage()),
+    );
+  }
 
   @override
   void dispose() {
@@ -119,8 +125,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+
+    Widget build(BuildContext context) => Scaffold(
       body: Container(
         height: double.infinity,
         decoration: BoxDecoration(
@@ -128,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.app_color,
+              Colors.blue,
               Colors.white70,
             ],
           ),
@@ -261,9 +267,9 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleLogin,
+                      onPressed:  _isLoading ? null : _passeDirectement,//_handleLogin,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.app_color,
+                        backgroundColor: Colors.blue,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -328,7 +334,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       const Text(
                         "Vous n'avez pas de compte ?",
-                        style: TextStyle(color: Colors.black54),
+                        style: TextStyle(color: Colors.black54,fontSize: 10),
                       ),
                       TextButton(
                         onPressed: _handleCreateAccount,
@@ -337,6 +343,7 @@ class _LoginPageState extends State<LoginPage> {
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.black54,
+                              fontSize: 14,
                               decoration: TextDecoration.underline
                           ),
                         ),
@@ -350,7 +357,7 @@ class _LoginPageState extends State<LoginPage> {
                   const Text(
                     'Version : 3.1.3',
                     style: TextStyle(
-                      color: Colors.app_color,
+                      color: Colors.blue,
                     ),
                   ),
 
@@ -362,5 +369,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
+
 }
