@@ -1,3 +1,4 @@
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:eduniger/pages/bootomBart/accueil_page.dart';
 import 'package:eduniger/services/login_api.dart';
 import 'package:flutter/material.dart';
@@ -91,34 +92,30 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
       body: _pages[_selectedIndex],
+      //utilisation du pachage ConvexAppBart pour la navigation
+      bottomNavigationBar: ConvexAppBar(
+        color: Colors.black,
+        activeColor: Colors.green,
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        elevation: 10,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Accueil',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Explorer',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-      ),
+    items: [
+    TabItem(icon: Icons.home, title: 'Accueil'),
+    TabItem(icon: Icons.map, title: 'Librairie'),
+    TabItem(icon: Icons.add, title: 'Eduna'),
+    TabItem(icon: Icons.message, title: 'Biliothèque'),
+    ],
+    //index par defaut
+    initialActiveIndex: _selectedIndex,
+    //style de la navigation il y a plusieur
+    style: TabStyle.flip,
+    height: 55,
+    //taille du cercle
+    curveSize: 0,
+
+    backgroundColor: Colors.white,
+    onTap:_onItemTapped,
+    )
     );
+
+
   }
 }
