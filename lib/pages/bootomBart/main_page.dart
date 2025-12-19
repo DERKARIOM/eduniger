@@ -98,16 +98,16 @@ class _MainPageState extends State<MainPage> {
         activeColor: Colors.green,
 
     items: [
-    TabItem(icon: Icons.home, title: 'Accueil'),
-    TabItem(icon: Icons.map, title: 'Librairie'),
-    TabItem(icon: Icons.add, title: 'Eduna'),
-    TabItem(icon: Icons.message, title: 'Biliothèque'),
+    TabItem(icon: Image.asset('assets/icon_bootomBart/home.png',color: Colors.green,)  , title: 'Accueil'),
+    TabItem(icon: Image.asset('assets/icon_bootomBart/livre.png',color: Colors.green,), title: 'Librairie'),
+    TabItem(icon: Image.asset('assets/icon_bootomBart/ia.png',color: Colors.green,), title: 'Eduna'),
+    TabItem(icon: Image.asset('assets/icon_bootomBart/biblio.png',color: Colors.green,), title: 'Biliothèque'),
     ],
     //index par defaut
     initialActiveIndex: _selectedIndex,
     //style de la navigation il y a plusieur
     style: TabStyle.flip,
-    height: 55,
+    height: 60,
     //taille du cercle
     curveSize: 0,
 
