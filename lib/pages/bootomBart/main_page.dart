@@ -3,6 +3,7 @@ import 'package:eduniger/pages/bootomBart/accueil_page.dart';
 import 'package:eduniger/services/login_api.dart';
 import 'package:flutter/material.dart';
 
+import '../../models/modelUser.dart';
 import 'bibliotheque_page.dart';
 import 'eduna_page.dart';
 import 'librairie_page.dart';
