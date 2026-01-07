@@ -23,18 +23,34 @@ class _AccueilPageState extends State<AccueilPage> {
     Book(
       id: '1',
       cover: 'assets/images/img_add_cover.png',
+      title: 'Livre 1',
+      structure: 'Structure 1',
+      category: 'Catégorie 1',
     ),
     Book(
       id: '2',
       cover: 'assets/images/img_wait_cover_book.png',
+      title: 'Livre 2',
+      structure: 'Structure 2',
+      category: 'Catégorie 2',
+
     ),
     Book(
       id: '3',
       cover: 'assets/images/img_add_cover.png',
+      title: 'Livre 3',
+      structure: 'Structure 3',
+      category: 'Catégorie 3',
+
+
     ),
     Book(
       id: '4',
       cover: 'assets/images/img_wait_cover_book.png',
+      title: 'Livre 4',
+      structure: 'Structure 4',
+      category: 'Catégorie 4',
+
     )
   ];
   List<Structure> structure = [
@@ -183,20 +199,6 @@ class _AccueilPageState extends State<AccueilPage> {
   void initState() {
     super.initState();
     _autoSwitch();
-    /*
-     _timer = Timer.periodic(const Duration(milliseconds: 30), (timer) {
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(
-          _scrollController.offset + 1.2, // vitesse
-        );
-
-        if (_scrollController.offset >=
-            _scrollController.position.maxScrollExtent) {
-          _scrollController.jumpTo(0);
-        }
-      }
-    });
-     */
   }
 
   @override
@@ -458,8 +460,8 @@ class _AccueilPageState extends State<AccueilPage> {
               ),
             ),
            SizedBox(height: 5,),
-        //liste des auteurs
-      SizedBox(
+          //liste des auteurs
+           SizedBox(
           height: 110,
 
       child: ListView.builder(

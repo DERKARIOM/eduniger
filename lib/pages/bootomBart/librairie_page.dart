@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+
+import '../../models/modelStructure.dart';
+import '../menu_librairie/categorie.dart';
+import '../menu_librairie/livre.dart';
+import '../menu_librairie/structure.dart';
 class LibrairiePage extends StatefulWidget {
   const LibrairiePage({super.key});
 
@@ -7,13 +12,52 @@ class LibrairiePage extends StatefulWidget {
 }
 
 class _LibrairiePageState extends State<LibrairiePage> {
+  List<Widget>  _pageLibrairie =[
+    Livre(),
+    Categorie(),
+     StructurePage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Text("Bienvenue sur la bibliothèque!"),
-      ),
-    );
+    return
+      DefaultTabController(
+        length: _pageLibrairie.length,
+        initialIndex: 0,
+        animationDuration: const Duration(milliseconds: 300),
+        child: Scaffold(
+          backgroundColor: Colors.white,
+            body: Column(
+              children: [
+                const TabBar(
+                  //indicatorSize: TabBarIndicatorSize.label,
+                  labelStyle: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  unselectedLabelStyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  labelColor: Colors.green,
+                  unselectedLabelColor: Colors.black,
+                  indicatorColor: Colors.green,
+                  tabs: [
+                    // Corrections orthographiques pour la clarté
+                    Tab(text: "Livre"),
+                    Tab(text: "Catégorie"),
+                    Tab(text: "Structure"),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
+                    children: _pageLibrairie,
+                  ),
+                )
+              ],
+            )),
+      );
+
+
   }
 }
