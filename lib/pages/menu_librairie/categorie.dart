@@ -67,10 +67,6 @@ class _CategorieState extends State<Categorie> {
       description: 'Description de la structure',
       isAdhere: false,),
 
-
-
-
-
   ];
   @override
   Widget build(BuildContext context) {

@@ -39,6 +39,7 @@ class _MainPageState extends State<MainPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
+          surfaceTintColor: Colors.white,
           backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
           flexibleSpace: SafeArea(
