@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:eduniger/pages/login/forgot_password_page.dart';
 import 'package:eduniger/pages/bootomBart/main_page.dart';
 import 'package:eduniger/pages/login/register_page.dart';
@@ -5,7 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:eduniger/services/login_api.dart';
 
-import '../../services/login_api.dart'; // Importer le service d'authentification
+import '../../infoApp/hachagePassword.dart';
+import '../../infoApp/versionAPP_tocken.dart';
+import '../../localDataBase/sqlflitEduniger.dart';
+import '../../models/modelUser.dart';
+import '../../services/login_api.dart';
+import '../../services/recomandation_api.dart';
+import '../bootomBart/accueil_page.dart'; // Importer le service d'authentification
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -20,13 +28,27 @@ class _LoginPageState extends State<LoginPage> {
   String _countryCode = '+227'; // Code Niger par défaut
   String _errorMessage = '';
   bool _isLoading = false;
+  bool _isPasswordVisible = false;
+  bool _visible = false;
+  String passwordHach='';
+  String _firebaseToken = '';
+  String _appVersion = '';
+  String _idUser = '';
   _passeDirectement() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => MainPage()),
     );
   }
-
+  Future<void> _loadAppInfo() async {
+    _firebaseToken = await AppInfo.getFirebaseToken();
+    _appVersion = await AppInfo.getAppVersion();
+    setState(() {});
+  }
+  void initState() {
+    super.initState();
+    _loadAppInfo();
+  }
   @override
   void dispose() {
     _phoneController.dispose();
@@ -64,45 +86,123 @@ class _LoginPageState extends State<LoginPage> {
       });
       return;
     }
-
     try {
-      // Appel à l'API de connexion
-      final result = await AuthService.login(
-        idNumber: _phoneController.text.trim(),
-        password: _passwordController.text,
-        version: '3.1.3', // Version de l'app
+      setState(() {
+         //passwordHach= _passwordController.text;
+         passwordHach= PasswordUtil.hashPassword(_passwordController.text);
+         print("Hash envoyé: $passwordHach");
+
+      });
+      // Appel du service d'authentification
+      AuthResponse response = await AuthService.login(
+        id_number: _phoneController.text.trim(),
+        password: passwordHach,
+        token: _firebaseToken,
+        version: _appVersion,
       );
+      //print("Réponse API message: ${response.message}");
+     // print("Réponse API data: ${response.data}");
 
-      if (!mounted) return;
+      setState(() { _isLoading = false; });
+      //response.isSuccess &&
+      if ( response.data != null) {
+        //print("Utilisateur trouvé: ${response.data!.user.name}");
+        // CONNEXION RÉUSSIE
+        User user = response.data!.user;
+        String accessToken = response.data!.accessToken;
+        //print("Token : $accessToken");
+        //print("Utilisateur :${user}");
 
-      if (result.success && result.user != null) {
-        // Connexion réussie
-        setState(() {
-          _isLoading = false;
-        });
+        try {
+          await DatabaseHelper.instance.saveUser(user, accessToken);
+          print("Utilisateur sauvegardé localement");
+          try {
+            await DatabaseHelper.instance.saveIdNumber(_phoneController.text.trim());
+            print("ID de l'utilisateur sauvegardé localement");
+            final idRecupere = await DatabaseHelper.instance.getIdNumber();
 
-        // Optionnel : Sauvegarder les données utilisateur localement
-        // await SharedPreferences...
+            setState(() {
+              _idUser = idRecupere.toString();
+            });
+            print("ID de l'utilisateur récupéré : $_idUser");
+          } catch (dbError) {
+            print('Erreur lors de la sauvegarde de l\'ID de l\'utilisateur : $dbError');
+          }
 
-        // Navigation vers la page principale
-        Navigator.pushReplacement(
+
+          print("ID de l'utilisateur défini pour la navigation : $_idUser");
+
+        } catch (dbError) {
+          print("Erreur SQL : $dbError");
+          // En cas d'erreur DB, on utilise quand même l'ID de l'API pour ne pas bloquer l'utilisateur
+        }
+        //print(accessToken);
+        //print(user.name);
+        /*
+        Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => MainPage(user: result.user),
-          ),
+          MaterialPageRoute(builder: (context) => AccueilPage(
+            IdNumber: _idUser,
+            Version: _appVersion,
+
+          )),
         );
+        */
+        Navigator.pushReplacementNamed(
+          context,
+          '/home',
+        );
+
+      /*
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MainPage()),
+        );
+
+         */
+
       } else {
-        // Erreur de connexion
+        // ERREUR RETOURNÉE PAR L'API (Identifiants incorrects, etc.)
+        String apiMessage = response.message.toLowerCase();
+        String finalMessage;
+
+        // On filtre les messages techniques de l'API pour les traduire
+        if (apiMessage.contains('incorrectpassword')) {
+          finalMessage = " le mot de passe est incorrect.";
+        } else if (apiMessage.contains('accountnotexist')) {
+          finalMessage = "cet  compte n'existe pas.";
+        }else if (apiMessage.contains('account locked')) {
+          finalMessage = "Votre compte est temporairement bloqué. Veuillez contacter le support.";
+        } else if (apiMessage.contains('update required')) {
+          finalMessage = "Veuillez mettre à jour votre application pour continuer.";
+        }
+        else if (apiMessage.isNotEmpty) {
+          // Si l'erreur est inconnue mais que l'API a renvoyé un message, on l'affiche
+          finalMessage = apiMessage;
+          print(apiMessage);
+        }
+        else {
+          // Message par défaut si l'API ne retourne rien
+          finalMessage = "Une erreur d'authentification est survenue.";
+        }
         setState(() {
-          _isLoading = false;
-          _errorMessage = result.message;
+          _errorMessage = finalMessage;
         });
       }
     } catch (e) {
+      // ERREUR TECHNIQUE (Réseau, Timeout, Crash serveur)
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Erreur de connexion. Vérifiez votre connexion internet.';
+        if (e.toString().contains('SocketException')) {
+          _errorMessage = "Pas de connexion internet. Veuillez vérifier votre réseau.";
+        } else if (e.toString().contains('TimeoutException')) {
+          _errorMessage = "Le serveur met trop de temps à répondre. Réessayez plus tard.";
+        } else {
+          _errorMessage = "Une erreur inattendue est survenue. Veuillez réessayer.";
+        }
       });
+      // Optionnel : imprimer l'erreur réelle dans la console pour le debug
+      debugPrint('Login Error: $e');
     }
   }
 
@@ -159,6 +259,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   // Champ numéro de téléphone avec code pays
                   Container(
+                    height: 60,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -205,6 +306,7 @@ class _LoginPageState extends State<LoginPage> {
 
                   // Champ mot de passe
                   Container(
+                    height: 65,
                     decoration: BoxDecoration(
                       boxShadow: [
                         BoxShadow(
@@ -215,10 +317,20 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                     ),
                     child: TextField(
+
                       controller: _passwordController,
-                      obscureText: true,
+                      obscureText: !_isPasswordVisible,
+                      keyboardType: TextInputType.visiblePassword,
                       decoration: InputDecoration(
                         hintText: 'Votre mot de passe ?',
+                        prefixIcon: const Icon(Icons.lock, color: Colors.black54),
+                        suffixIcon: IconButton(onPressed: (){
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        }, icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off, color: Colors.black54),
+
+                        ),
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -267,7 +379,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed:  _isLoading ? null : _passeDirectement,//_handleLogin,
+                      onPressed:  _isLoading ? null : _handleLogin,//_passeDirectement,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         shape: RoundedRectangleBorder(
@@ -354,8 +466,8 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 20),
 
                   // Version
-                  const Text(
-                    'Version : 3.1.3',
+                   Text(
+                     'Version : ${_appVersion}',
                     style: TextStyle(
                       color: Colors.blue,
                     ),

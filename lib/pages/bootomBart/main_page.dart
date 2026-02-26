@@ -3,28 +3,61 @@ import 'package:eduniger/pages/bootomBart/accueil_page.dart';
 import 'package:eduniger/services/login_api.dart';
 import 'package:flutter/material.dart';
 
+import '../../infoApp/versionAPP_tocken.dart';
+import '../../localDataBase/sqlflitEduniger.dart';
 import '../../models/modelUser.dart';
 import 'bibliotheque_page.dart';
 import 'eduna_page.dart';
 import 'librairie_page.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({Key? key, User? user}) : super(key: key);
-
+  const MainPage({Key? key, }) : super(key: key);
+  //User? user
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
+  String idNumber = "";
+  String version = ""; // Initialisé à vide
+  bool isLoading = true; // Pour attendre que les données soient prêtes
 
-  // Liste des pages à afficher selon l'onglet sélectionné
-  final List<Widget> _pages = [
-    AccueilPage(),
-    LibrairiePage(),
-    EdunaPage(),
-    BibliothequePage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _initData(); // Appeler l'initialisation au démarrage
+  }
+
+  // Fonction pour charger toutes les infos nécessaires
+  Future<void> _initData() async {
+    //final userData = await DatabaseHelper.instance.getUser();
+    final idUser = await DatabaseHelper.instance.getIdNumber();
+    final appVersion = await AppInfo.getAppVersion();
+
+    setState(() {
+      idNumber = idUser.toString();
+      version = appVersion;
+      isLoading = false; // Le chargement est fini
+    });
+  }
+
+  // AU LIEU d'une liste de widgets fixe, on utilise une fonction
+  // qui retourne le widget selon l'index
+  Widget _getPage(int index) {
+    switch (index) {
+      case 0:
+        return AccueilPage(IdNumber: idNumber, Version: version);
+      case 1:
+        return LibrairiePage();
+      case 2:
+        return EdunaPage();
+      case 3:
+        return BibliothequePage();
+      default:
+        return AccueilPage(IdNumber: idNumber, Version: version);
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -32,8 +65,25 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+
+  Future<void> _handleLogout(BuildContext context) async {
+    // 1. Supprimer les données locales
+    await DatabaseHelper.instance.logout();
+
+    // 2. Rediriger vers la page de login et supprimer tout l'historique de navigation
+    if (context.mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        '/login',
+            (Route<dynamic> route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
@@ -78,12 +128,14 @@ class _MainPageState extends State<MainPage> {
                     child:  Icon(Icons.notifications_none_sharp, size: 30,),
 
                   ),
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: Colors.grey[200],
-                    backgroundImage: const AssetImage('assets/images/user.png'),
+                  const SizedBox(width: 5),
+                  IconButton(onPressed: (){
+                    _handleLogout(
+                      context,
+                    );
 
-                  ),
+                  },
+                      icon:Icon(Icons.menu_sharp, size: 30,))
 
 
 
@@ -93,7 +145,7 @@ class _MainPageState extends State<MainPage> {
           ),
         ),
       ),
-      body: _pages[_selectedIndex],
+      body: _getPage(_selectedIndex),
       //utilisation du pachage ConvexAppBart pour la navigation
       bottomNavigationBar: ConvexAppBar(
         color: Colors.black,

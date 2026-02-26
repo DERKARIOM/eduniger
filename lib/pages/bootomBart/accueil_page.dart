@@ -1,3 +1,4 @@
+/*
 import 'dart:async';
 
 import 'package:eduniger/models/modelBook.dart';
@@ -19,178 +20,40 @@ class _AccueilPageState extends State<AccueilPage> {
     'assets/pub/2.png',
     'assets/pub/6.png',
   ];
-  List<Book> couverture = [
-    Book(
-      id: '1',
-      cover: 'assets/images/img_add_cover.png',
-      title: 'Livre 1',
-      structure: 'Structure 1',
-      category: 'Catégorie 1',
-    ),
-    Book(
-      id: '2',
-      cover: 'assets/images/img_wait_cover_book.png',
-      title: 'Livre 2',
-      structure: 'Structure 2',
-      category: 'Catégorie 2',
-
-    ),
-    Book(
-      id: '3',
-      cover: 'assets/images/img_add_cover.png',
-      title: 'Livre 3',
-      structure: 'Structure 3',
-      category: 'Catégorie 3',
-
-
-    ),
-    Book(
-      id: '4',
-      cover: 'assets/images/img_wait_cover_book.png',
-      title: 'Livre 4',
-      structure: 'Structure 4',
-      category: 'Catégorie 4',
-
-    )
-  ];
-  List<Structure> structure = [
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'OpenLab',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Kit TD',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Cajec',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Kit TA',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Concours EAMAC',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Kit BEPC',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-
-  ];
-  List<Author> auteurs = [
-    Author(
-      name: 'Sembene',
-      firstName: 'Sembene',
-      profile: 'assets/images/user.png',
-      isAdmin: false,
-    ),
-    Author(
-      name: 'Sembene',
-      firstName: 'Sembene',
-      profile: 'assets/images/user.png',
-      isAdmin: false,),
-    Author(
-      name: 'Sembene',
-      firstName: 'Sembene',
-      profile: 'assets/images/user.png',
-      isAdmin: false,
-    ),
-    Author(
-      name: 'Sembene',
-      firstName: 'Sembene',
-      profile: 'assets/images/user.png',
-      isAdmin: false,),
-    Author(
-      name: 'Sembene',
-      firstName: 'Sembene',
-      profile: 'assets/images/user.png',
-      isAdmin: false,
-    ),
-    Author(
-      name: 'Sembene',
-      firstName: 'Sembene',
-      profile: 'assets/images/user.png',
-      isAdmin: false,),
-
-
-
-  ];
+  List<Book> couverture = [];
+  List<Structure> structure =[] ;
+  List<Author> auteurs = [];
 // Auto-scroll de publications
 
   int _currentPage = 0;
   final PageController _pageController = PageController(initialPage: 0);
 
   void _autoSwitch() async {
-    while (true) {
-      await Future.delayed(const Duration(seconds: 4)); // temps d'affichage
+    // On attend que le premier frame soit dessiné pour être sûr que le PageController est attaché
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
 
-      _currentPage++;
+      // On utilise !mounted pour arrêter la boucle si l'utilisateur quitte la page
+      while (mounted) {
+        await Future.delayed(const Duration(seconds: 4));
 
-      if (_currentPage >= publications.length) {
-        _currentPage = 0;
+        // Vérification indispensable avant toute manipulation du controller
+        if (_pageController.hasClients) {
+          _currentPage++;
+
+          if (_currentPage >= publications.length) {
+            _currentPage = 0;
+          }
+
+          // Utiliser animateToPage est plus joli que jumpToPage pour un slider
+          _pageController.animateToPage(
+            _currentPage,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+          );
+        }
       }
-
-      _pageController.jumpToPage(_currentPage); // saut instantané ❗
-    }
+    });
   }
-
   Timer? _timer;
   final ScrollController _scrollController = ScrollController();
 // fin  Auto-scroll de publications
@@ -204,6 +67,7 @@ class _AccueilPageState extends State<AccueilPage> {
   @override
   void dispose() {
     _timer?.cancel();
+    _pageController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -314,15 +178,16 @@ class _AccueilPageState extends State<AccueilPage> {
                     curve: Curves.easeInOut,
                   ),
                   Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Ajouter un contenu",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold)),
-                        const Text("Créez librement"),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text("Ajouter un contenu",style: TextStyle(fontSize: 15,fontWeight: FontWeight.bold)),
+                          const Text("Créez librement"),
 
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+
                   Container(
                     height: 35,
                     width: 100,
@@ -374,7 +239,7 @@ class _AccueilPageState extends State<AccueilPage> {
                     child:ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.asset(
-                        couverture[index].cover!,
+                        couverture[index].couverture!,
                         fit: BoxFit.cover,
                         width: 100,
                         height: 150,
@@ -411,7 +276,7 @@ class _AccueilPageState extends State<AccueilPage> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 leading: CircleAvatar(
                   radius: 35, // Augmenté pour un meilleur aspect
-                  backgroundImage: AssetImage(structure[index].cover),
+                  backgroundImage: AssetImage(structure[index].logo),
                 ),
                 title: Text(
                   structure[index].name,
@@ -493,6 +358,900 @@ class _AccueilPageState extends State<AccueilPage> {
           ],
       )
       )
+    );
+  }
+}
+*/
+
+import 'dart:async';
+import 'package:eduniger/models/modelBook.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../../models/modelAutheur.dart';
+import '../../models/modelStructure.dart';
+import '../../services/recomandation_api.dart';
+import 'bibliotheque_page.dart';
+
+class AccueilPage extends StatefulWidget {
+  final String IdNumber;
+  final String Version;
+
+  const AccueilPage({
+    super.key,
+
+    required this.IdNumber,
+    required this.Version,
+
+  });
+
+  @override
+  State<AccueilPage> createState() => _AccueilPageState();
+}
+
+class _AccueilPageState extends State<AccueilPage> {
+  //final String baseUrl = "https://votre-domaine.com/images/logos/";
+  static const String baseUrl = 'https://eduniger.com/ressources/cover/';
+  List<String> publications = [
+    'assets/pub/1.png',
+    'assets/pub/2.png',
+    'assets/pub/6.png',
+  ];
+
+  // Données chargées depuis l'API
+  List<Book> couverture = [];
+  List<Structure> structure = [];
+  List<Structure> structureAdd = [];
+  List<Structure> structureRecom = [];
+  List<Author> auteurs = [];
+
+  // Future pour FutureBuilder
+  late Future<Map<String, dynamic>> _dataFuture;
+
+  // Controllers
+  int _currentPage = 0;
+  final PageController _pageController = PageController(initialPage: 0);
+  final ScrollController _scrollController = ScrollController();
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+
+
+    _loadData();
+    _autoSwitch();
+  }
+
+  // Charger les données depuis l'API
+
+  void _loadData() {
+    setState(() {
+      _dataFuture = RecommendationService.getAllRecommendations(
+        idNumber: widget.IdNumber,
+        version: widget.Version,
+      ).timeout(
+        const Duration(seconds: 45),
+        onTimeout: () {
+          throw TimeoutException('Le chargement prend trop de temps. Vérifiez votre connexion.');
+        },
+      );
+    });
+  }
+
+
+  Future<void> _onRefresh() async {
+    _loadData();
+    await _dataFuture;
+  }
+
+  // Auto-scroll publications
+  void _autoSwitch() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      while (mounted) {
+        await Future.delayed(const Duration(seconds: 4));
+        if (_pageController.hasClients) {
+          _currentPage++;
+          if (_currentPage >= publications.length) {
+            _currentPage = 0;
+          }
+          _pageController.animateToPage(
+            _currentPage,
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _pageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _dataFuture,
+        builder: (context, snapshot) {
+          // ===== GESTION DES ÉTATS =====
+
+          // 1. CHARGEMENT
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _buildLoadingState();
+          }
+
+          // 2. ERREUR
+          if (snapshot.hasError) {
+            return _buildErrorState(snapshot.error.toString());
+          }
+
+          // 3. DONNÉES NULLES
+          if (!snapshot.hasData || snapshot.data == null) {
+            return _buildEmptyState();
+          }
+
+          // 4. EXTRACTION CORRECTE DES DONNÉES
+          // 4. EXTRACTION CORRECTE DES DONNÉES
+          final data = snapshot.data!;
+
+          print('Data keys: ${data.keys}');
+
+          // Extraction avec vérification
+          final booksResponse = data['recommendedBooks'] as ApiResponse<List<Book>>;
+          final structuresAdd = data['joinedStructures'] as ApiResponse<List<Structure>>;
+          final structuresRecom = data['recommendedStructures'] as ApiResponse<List<Structure>>;
+          final authorsResponse = data['recommendedAuthors'] as ApiResponse<List<Author>>;
+
+
+          print('Books response success: ${booksResponse.success}');
+          print('Books data null?: ${booksResponse.data == null}');
+          print('Books count: ${booksResponse.data?.length ?? 0}');
+
+          print('Structures response success: ${structuresAdd.success}');
+          print('Structures data null?: ${structuresAdd.data == null}');
+          print('Structures count: ${structuresAdd.data?.length ?? 0}');
+
+          print('Structures response success: ${structuresRecom.success}');
+          print('Structures data null?: ${structuresRecom.data == null}');
+          print('Structures count: ${structuresRecom.data?.length ?? 0}');
+
+          print('Authors response success: ${authorsResponse.success}');
+          print('Authors data null?: ${authorsResponse.data == null}');
+          print('Authors count: ${authorsResponse.data?.length ?? 0}');
+
+// Mise à jour des listes locales
+          couverture = booksResponse.data ?? [];
+          structureAdd = structuresAdd.data ?? [];
+          structureRecom = structuresRecom.data ?? [];
+          auteurs = authorsResponse.data ?? [];
+
+          print('\n✅ UI Lists updated:');
+          print('  - couverture: ${couverture.length}');
+          print('  - structure: ${structure.length}');
+          print('  - auteurs: ${auteurs.length}');
+          print('======================================\n');
+
+// Vérifier si toutes les listes sont vides
+          if (couverture.isEmpty && structure.isEmpty && auteurs.isEmpty) {
+            print('⚠️ WARNING: All lists are empty!');
+            // Vous pouvez retourner l'état vide ici si vous voulez
+            // return _buildEmptyState();
+          }
+
+          // 5. AFFICHAGE DU CONTENU
+          return RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: _buildContentState(),
+          );
+        },
+      ),
+    );
+  }
+
+  // ==================== ÉTATS UI ====================
+
+  /// État de chargement avec shimmer
+  Widget _buildLoadingState() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(5),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+
+          // Shimmer pour publications
+          _buildShimmerBox(height: 180, borderRadius: 10),
+
+          const SizedBox(height: 30),
+
+          // Shimmer pour "Ajouter un contenu"
+          _buildShimmerBox(height: 100),
+
+          const SizedBox(height: 20),
+
+          // Shimmer pour "Recommandés"
+          _buildSectionShimmer('Recommandés', isHorizontal: true),
+
+          const SizedBox(height: 20),
+
+          // Shimmer pour "Structures"
+          _buildSectionShimmer('Structures', isHorizontal: false),
+
+          const SizedBox(height: 20),
+
+          // Shimmer pour "Auteurs"
+          _buildSectionShimmer('Auteurs', isHorizontal: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmerBox({
+    required double height,
+    double? width,
+    double borderRadius = 8,
+  }) {
+    return Container(
+      height: height,
+      width: width,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+
+    );
+  }
+
+  Widget _buildSectionShimmer(String title, {required bool isHorizontal}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 120,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                width: 80,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (isHorizontal)
+          SizedBox(
+            height: 160,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return _buildShimmerBox(
+                  height: 150,
+                  width: 100,
+                  borderRadius: 10,
+                );
+              },
+            ),
+          )
+        else
+          Column(
+            children: List.generate(
+              3,
+                  (index) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
+                child: Row(
+                  children: [
+                    _buildShimmerBox(height: 70, width: 70, borderRadius: 35),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildShimmerBox(height: 16, width: 150),
+                          const SizedBox(height: 8),
+                          _buildShimmerBox(height: 14, width: 100),
+                        ],
+                      ),
+                    ),
+                    _buildShimmerBox(height: 35, width: 100, borderRadius: 30),
+                  ],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// État d'erreur avec diagnostic
+  Widget _buildErrorState(String error) {
+    IconData errorIcon;
+    String errorTitle;
+    String errorMessage;
+    Color errorColor;
+
+    // Diagnostic du type d'erreur
+    if (error.contains('connexion') ||
+        error.contains('network') ||
+        error.contains('SocketException') ||
+        error.contains('Failed host lookup')) {
+      errorIcon = Icons.wifi_off;
+      errorTitle = 'Pas de connexion';
+      errorMessage = 'Vérifiez votre connexion Internet et réessayez.';
+      errorColor = Colors.orange;
+    } else if (error.contains('timeout') || error.contains('trop de temps')) {
+      errorIcon = Icons.access_time;
+      errorTitle = 'Délai dépassé';
+      errorMessage = 'Le serveur met trop de temps à répondre.';
+      errorColor = Colors.amber;
+    } else if (error.contains('401') || error.contains('Non autorisé')) {
+      errorIcon = Icons.lock;
+      errorTitle = 'Non autorisé';
+      errorMessage = 'Votre session a expiré. Reconnectez-vous.';
+      errorColor = Colors.red;
+    } else if (error.contains('404') || error.contains('non trouvée')) {
+      errorIcon = Icons.search_off;
+      errorTitle = 'Ressource introuvable';
+      errorMessage = 'Les données demandées n\'existent pas.';
+      errorColor = Colors.blue;
+    } else if (error.contains('500') || error.contains('serveur')) {
+      errorIcon = Icons.error;
+      errorTitle = 'Erreur serveur';
+      errorMessage = 'Le serveur rencontre un problème.';
+      errorColor = Colors.red;
+    } else {
+      errorIcon = Icons.warning;
+      errorTitle = 'Erreur ';
+      errorMessage = error;
+      errorColor = Colors.grey;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              errorIcon,
+              size: 80,
+              color: errorColor,
+            )
+                .animate(onPlay: (controller) => controller.repeat())
+                .shake(duration: 500.ms, hz: 2),
+
+            const SizedBox(height: 24),
+
+            Text(
+              errorTitle,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: errorColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              errorMessage,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 32),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Bouton réessayer
+                ElevatedButton.icon(
+                  onPressed: _loadData,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Réessayer'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 11,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3, end: 0),
+                Spacer(),
+                //const SizedBox(height: 16),
+
+                // Détails techniques (optionnel)
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BibliothequePage()),
+                    );
+                  },
+                  child: const Text(
+                    'Bibliothèque local',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3, end: 0),
+              ],
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// État vide (aucune donnée disponible)
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.inbox,
+              size: 80,
+              color: Colors.grey[400],
+            ).animate().fadeIn().scale(),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'Aucune recommandation',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            const Text(
+              'Commencez à explorer pour obtenir des recommandations personnalisées.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 32),
+
+            ElevatedButton.icon(
+              onPressed: _loadData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Actualiser'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// État de succès (contenu principal)
+  Widget _buildContentState() {
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: Colors.green,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(5),
+        physics: const AlwaysScrollableScrollPhysics(), // Important pour le RefreshIndicator
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+
+            // Les publications
+            _buildPublicationsSection(),
+
+            const SizedBox(height: 30),
+
+            // Ajouter un contenu
+            _buildAddContentSection(),
+
+            // Livres recommandés
+            _buildRecommendedBooksSection(),
+
+            // Structures
+            _buildStructuresSection(),
+
+            const SizedBox(height: 5),
+
+            // Auteurs
+            _buildAuthorsSection(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================== SECTIONS DU CONTENU ====================
+
+  Widget _buildPublicationsSection() {
+    return SizedBox(
+      height: 180,
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: publications.length,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              border: Border.all(color: Colors.grey, width: 1),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.asset(
+                publications[index],
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          )
+              .animate()
+              .fadeIn(duration: 400.ms)
+              .scale(
+            begin: const Offset(0.95, 0.95),
+            end: const Offset(1, 1),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAddContentSection() {
+    return Container(
+      height: 100,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          CircleAvatar(
+            radius: 25,
+            backgroundColor: Colors.white,
+            backgroundImage: const AssetImage('assets/images/add_auteurs.png'),
+          ).animate(
+            onPlay: (controller) => controller.repeat(reverse: true),
+          ).moveY(
+            begin: 0,
+            end: -15,
+            duration: 800.ms,
+            curve: Curves.easeInOut,
+          ),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  "Ajouter un contenu",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                Text("Créez librement"),
+              ],
+            ),
+          ),
+          Container(
+            height: 35,
+            width: 100,
+            decoration: BoxDecoration(
+              color: Colors.green,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: TextButton(
+              onPressed: () {},
+              child: const Text(
+                "Ajouter",
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRecommendedBooksSection() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: const [
+              Text(
+                'Recommandés',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              Spacer(),
+              Text(
+                'Voir plus',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Gestion du cas vide
+        if (couverture.isEmpty)
+          _buildEmptySection('Aucun livre recommandé pour le moment')
+        else
+          SizedBox(
+            height: 160,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: couverture.length < 6 ? couverture.length : 6,
+              itemBuilder: (context, index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.all(Radius.circular(10)),
+                    border: Border.all(color: Colors.grey, width: 1),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network( '$baseUrl${couverture[index].blanket!}'
+                      ,
+                      fit: BoxFit.cover,
+                      width: 100,
+                      height: 150,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 100,
+                          height: 150,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.broken_image, size: 40),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          width: 100,
+                          height: 150,
+                          color: Colors.grey[300],
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ).animate(delay: (index * 100).ms).fadeIn();
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildStructuresSection() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: const [
+              Text(
+                'Structure',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              Spacer(),
+              Text(
+                'Voir plus',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        if (structureAdd.isEmpty)
+          _buildEmptySection('Aucune structure disponible')
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: structureAdd.length < 6 ? structureAdd.length : 6,
+            itemBuilder: (context, index) {
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                leading: CircleAvatar(
+                  radius: 35,
+                  backgroundColor: Colors.grey[200], // Couleur de fond si l'image échoue
+                  backgroundImage: (structureAdd[index].logo != null && structureAdd[index].logo!.isNotEmpty)
+                      ? NetworkImage('$baseUrl${structureAdd[index].logo}')
+                      : null,
+                  // Gestion de l'erreur de chargement réseau
+                  onBackgroundImageError: (exception, stackTrace) {
+                    print("Erreur de chargement du logo: $exception");
+                  },
+                  // L'icône enfant ne s'affiche que si backgroundImage est null
+                  child: (structureAdd[index].logo == null || structureAdd[index].logo!.isEmpty)
+                      ? const Icon(Icons.business, color: Colors.grey)
+                      : null,
+                ),
+
+                title: Text(
+                  structureAdd[index].name??'',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  "${structureAdd[index].bookNumber} livres",
+                  style: const TextStyle(fontSize: 13),
+                ),
+                trailing: Container(
+                  height: 35,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: structureAdd[index].isAdhere ? Colors.black45 : Colors.green,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: TextButton(
+                    onPressed: () {},
+                    child: Text(
+                      structureAdd[index].isAdhere ? "Adhéré" : "S'adhérer",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildAuthorsSection() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: const [
+              Text(
+                'Auteurs',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+              ),
+              Spacer(),
+              Text(
+                'Voir plus',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 5),
+
+        if (auteurs.isEmpty)
+          _buildEmptySection('Aucun auteur recommandé')
+        else
+          SizedBox(
+            height: 110,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: auteurs.length < 6 ? auteurs.length : 6,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        backgroundColor: Colors.grey[200], // Fond gris clair plus visible que white12
+                        backgroundImage: (auteurs[index].profile != null && auteurs[index].profile!.isNotEmpty)
+                            ? NetworkImage('$baseUrl${auteurs[index].profile}')
+                            : null,
+                        onBackgroundImageError: (exception, stackTrace) {
+                          // Cette fonction attrape l'erreur si l'image 404 ou URL invalide
+                          print("Erreur chargement profil auteur: $exception");
+                        },
+                        child: (auteurs[index].profile == null || auteurs[index].profile!.isEmpty)
+                            ? const Icon(Icons.person, color: Colors.grey)
+                            : null,
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        auteurs[index].name??'',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEmptySection(String message) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
+      child: Column(
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 50,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

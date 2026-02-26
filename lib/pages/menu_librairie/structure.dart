@@ -9,87 +9,7 @@ class StructurePage extends StatefulWidget {
 }
 
 class _StructureState extends State<StructurePage> {
-  List<Structure> structure = [
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'OpenLab',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Kit TD',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Cajec',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Kit TA',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Concours EAMAC',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-    Structure(
-      id: '1',
-      cover: 'assets/images/add_auteurs.png',
-      name: 'Kit BEPC',
-      description: 'Description de la structure',
-      isAdhere: false,
-      banner: 'assets/images/add_auteurs.png',
-      author: 'Nom de l\'auteur',
-      adhererNumber: '123',
-      bookNumber: '456',
-      admin: 'Nom de l\'administrateur',
-
-    ),
-
-  ];
+  List<Structure> structure = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,10 +25,12 @@ class _StructureState extends State<StructurePage> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 leading: CircleAvatar(
                   radius: 35, // Augmenté pour un meilleur aspect
-                  backgroundImage: AssetImage(structure[index].cover),
+                  backgroundImage: NetworkImage(
+                    structure[index].logo??'',
+                  ),
                 ),
                 title: Text(
-                  structure[index].name,
+                  structure[index].name??'',
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(

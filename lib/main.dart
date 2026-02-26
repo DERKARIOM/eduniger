@@ -1,9 +1,13 @@
 
+import 'package:eduniger/pages/bootomBart/accueil_page.dart';
+import 'package:eduniger/pages/bootomBart/main_page.dart';
 import 'package:eduniger/pages/login/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() {
+import 'localDataBase/sqlflitEduniger.dart';
+
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(
@@ -13,15 +17,35 @@ void main() {
       statusBarBrightness: Brightness.light,
     ),
   );
-  runApp(EduNigerApp());
+  // Vérifier la session
+ // bool sessionActive = await DatabaseHelper.instance.isSessionValid();
+  bool sessionActive = false;
+  try {
+    sessionActive = await DatabaseHelper.instance.isSessionValid();
+  } catch (e) {
+    print("Erreur initialisation session: $e");
+    sessionActive = false;
+  }
+  runApp(EduNigerApp(initialRoute: sessionActive ? '/home' : '/login'));
+
+  //runApp(EduNigerApp());
 }
 
 class EduNigerApp extends StatelessWidget {
+  final String initialRoute;
+  const EduNigerApp({super.key, required this.initialRoute});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginPage(),
+      initialRoute: initialRoute, // L'app démarre sur la bonne page
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/home': (context) =>MainPage(
+        ),
+      },
+      //home: LoginPage(),
     );
   }
 }

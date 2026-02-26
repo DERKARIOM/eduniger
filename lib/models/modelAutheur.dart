@@ -1,51 +1,74 @@
-
-
-
+import 'modelUser.dart';
+import 'package:flutter/material.dart';
+/*
+class Author extends User {
+  int level;
+  String? whatsapp;
+  Author({
+    this.whatsapp,
+    required super.id,
+    required super.phone,
+    required super.name,
+    required super.firstName,
+    required super.email,
+    required super.profile,
+    required this.level});
+  factory Author.fromJson(Map<String, dynamic> json) {
+    return Author(
+      id: json['id'] ??'',
+      phone: json['phone'] ??'',
+      name: json['name'] ??'',
+      firstName: json['firstName'] ??'',
+      email: json['email'] ??'',
+      profile: json['profile'] ??'',
+      level: json['level'] is int ? json['level'] : int.tryParse(json['level'].toString()) ?? 0,
+      whatsapp: json['whatsapp'] ??'',
+    );
+  }
+}
+*/
+// ─── modelAuthor.dart ─────────────────────────────────────────────
 import 'modelUser.dart';
 
 class Author extends User {
-  // On utilise un seul type pour `profile`. `String` est généralement plus flexible
-  // pour contenir un chemin d'accès (URL) ou une référence à un asset.
-  String? profile;
-  String? profession;
-  String? call;
-  String? email;
+  int level;
   String? whatsapp;
 
-  // Constructeur principal avec des paramètres nommés pour plus de clarté.
   Author({
-    // Paramètres de la classe parente (User)
-    required String name,
-    required String firstName,
-    required bool isAdmin,
-
-
-    // Paramètres de la classe Author
-    this.profile,
-    this.profession,
-    this.call,
-    this.email,
     this.whatsapp,
-  }) : super(name: name, firstName: firstName, isAdmin: isAdmin);
+    required super.id,
+    super.phone,       // = call dans le JSON
+    super.name,
+    super.firstName,
+    super.email,
+    super.profile,
+    super.profession,  // String
+    required this.level,
+  });
 
-  factory Author.fromProfile({
-    required String name,
-    required String profile,
-    required String firstName,
-    required bool isAdmin,
-  }) {
+  factory Author.fromJson(Map<String, dynamic> json) {
     return Author(
-      name: name,
-      profile: profile,
-      firstName: firstName,
-      isAdmin: isAdmin,
+      // ← clé "idAuthor" et non "id"
+      id: json['idAuthor'] is int
+          ? json['idAuthor']
+          : int.tryParse(json['idAuthor']?.toString() ?? '0') ?? 0,
 
+      // ← clé "call" et non "phone"
+      phone: json['call']?.toString() ?? '',
+
+      name: json['name']?.toString() ?? '',
+      firstName: json['firstName']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      profile: json['profile']?.toString() ?? '',
+
+      // ← "profession" est une String ici ("AUTEUR EDUNIGER")
+      profession: json['profession']?.toString() ?? '',
+
+      level: json['level'] is int
+          ? json['level']
+          : int.tryParse(json['level']?.toString() ?? '0') ?? 0,
+
+      whatsapp: json['whatsapp']?.toString() ?? '',
     );
   }
-
-// Getters et Setters ne sont pas nécessaires en Dart pour un accès direct.
-// Vous pouvez faire :
-// var myAuthor = Author(name: 'Sembene');
-// myAuthor.profession = 'Cinéaste'; // set
-// print(myAuthor.profession); // get
 }

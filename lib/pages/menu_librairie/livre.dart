@@ -10,86 +10,8 @@ class Livre extends StatefulWidget {
 
 class _LivreState extends State<Livre> {
   List<Book> couverture = [
-    Book(
-      id: '1',
-      cover: 'assets/images/img_add_cover.png',
-      title: "AES: L'Afrique qui se lève",
-      structure: 'OpenLab',
-      category: 'Histoire et Culture',
-      ispdf: true,
-
-    ),
-    Book(
-      id: '2',
-      cover: 'assets/images/img_wait_cover_book.png',
-      title: 'Dominez le Futur',
-      structure: 'OpenLab',
-      category: 'développement personnel',
-      ispdf: true,
-
-    ),
-    Book(
-      id: '3',
-      cover: 'assets/images/img_add_cover.png',
-      title: "Le Pouvoir extraordinaire de l'humanité chez les dirigeants",
-      structure: 'CAJEC',
-      category: 'développement personnel',
-      ispdf: true,
-      isphisique: true,
 
 
-    ),
-    Book(
-      id: '4',
-      cover: 'assets/images/img_wait_cover_book.png',
-      title: "Il suffit d'une décision pour changer de vie",
-      structure: 'CAJEC',
-      category: 'développement personnel',
-      ispdf: true,
-      isphisique: true,
-
-
-    ),
-    Book(
-      id: '1',
-      cover: 'assets/images/img_add_cover.png',
-      title: "AES: L'Afrique qui se lève",
-      structure: 'OpenLab',
-      category: 'Histoire et Culture',
-      ispdf: true,
-
-    ),
-    Book(
-      id: '2',
-      cover: 'assets/images/img_wait_cover_book.png',
-      title: 'Dominez le Futur',
-      structure: 'OpenLab',
-      category: 'développement personnel',
-      ispdf: true,
-
-    ),
-    Book(
-      id: '3',
-      cover: 'assets/images/img_add_cover.png',
-      title: "Le Pouvoir extraordinaire de l'humanité chez les dirigeants",
-      structure: 'CAJEC',
-      category: 'développement personnel',
-      ispdf: true,
-      isphisique: true,
-
-
-    ),
-    Book(
-      id: '4',
-      cover: 'assets/images/img_wait_cover_book.png',
-      title: "Il suffit d'une décision pour changer de vie",
-      structure: 'CAJEC',
-      category: 'développement personnel',
-      ispdf: true,
-      isphisique: true,
-
-
-    )
   ];
   @override
   Widget build(BuildContext context) {
@@ -122,7 +44,7 @@ class _LivreState extends State<Livre> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.asset(
-                        book.cover!,
+                        book.blanket!,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -137,7 +59,7 @@ class _LivreState extends State<Livre> {
                       children: [
                         const SizedBox(height: 15), // Petit espace pour centrer verticalement
                         Text(
-                          book.title,
+                          book.bookTitle??"",
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                           // Permet au texte de passer à la ligne s'il est trop long
                           maxLines: 2,
@@ -145,24 +67,24 @@ class _LivreState extends State<Livre> {
                         ),
                         const SizedBox(height: 8), // Espace entre le titre et le sous-titre
                         Text(
-                          "${book.structure} : ${book.category}",
+                          "${book.nameStruct} : ${book.categoryTitle}",
                           style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),
                         ),
                         const SizedBox(height: 8), // Espace entre le sous-titre et le bouton
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            book.isphisique ==true ?Icon(Icons.menu_book_sharp,color: Colors.green,size: 15,):SizedBox(),
+                            book.isPhysic ==true ?Icon(Icons.menu_book_sharp,color: Colors.green,size: 15,):SizedBox(),
                             const SizedBox(width: 8),
-                            book.ispdf ==true ?Icon(Icons.picture_as_pdf,color: Colors.green,size: 15,):SizedBox(),
+                            book.electronic ==true ?Icon(Icons.picture_as_pdf,color: Colors.green,size: 15,):SizedBox(),
                             const SizedBox(width: 8),
-                            book.isaudio ==true ?Icon(Icons.audiotrack,color: Colors.green,size: 15,):SizedBox(),
+                            book.isAudio ==true ?Icon(Icons.audiotrack,color: Colors.green,size: 15,):SizedBox(),
                             const SizedBox(width: 8),
                             Icon(Icons.thumb_up_off_alt,color: Colors.green,size: 15,),
-                            Text("  10",style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),),
+                            Text( book.numberLike.toString() ?? "0",style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),),
                             const SizedBox(width:15),
                             Icon(Icons.visibility_sharp,color: Colors.green,size: 15,),
-                            Text("  40",style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),)
+                            Text(book.numberView.toString()??"0",style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey),)
 
 
                           ],

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../infoApp/hachagePassword.dart';
+import '../../infoApp/versionAPP_tocken.dart';
+import '../../models/modelUser.dart';
+import '../../services/changePassword_api.dart';
+
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({Key? key}) : super(key: key);
 
@@ -12,10 +17,15 @@ class _ChangePasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-
+  String passwordHach='';
+  String _appVersion='';
+  String finalMessage='';
   String _errorMessage = '';
   bool _isLoading = false;
-
+  Future<void> _loadAppInfo() async {
+    _appVersion = await AppInfo.getAppVersion();
+    setState(() {});
+  }
   @override
   void dispose() {
     _phoneController.dispose();
@@ -25,7 +35,7 @@ class _ChangePasswordPageState extends State<ForgotPasswordPage> {
     super.dispose();
   }
 
-  void _handleChangePassword() {
+  Future<void> _handleChangePassword() async {
     setState(() {
       _errorMessage = '';
 
@@ -34,7 +44,8 @@ class _ChangePasswordPageState extends State<ForgotPasswordPage> {
         _errorMessage = 'Veuillez entrer votre numéro';
         return;
       }
-      if (_emailController.text.isEmpty || !_emailController.text.contains('@')) {
+      if (_emailController.text.isEmpty ||
+          !_emailController.text.contains('@')) {
         _errorMessage = 'Veuillez entrer un email valide';
         return;
       }
@@ -46,34 +57,85 @@ class _ChangePasswordPageState extends State<ForgotPasswordPage> {
         _errorMessage = 'Les mots de passe ne correspondent pas';
         return;
       }
-      if (_passwordController.text.length < 6) {
-        _errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
-        return;
-      }
 
-      _isLoading = true;
     });
-
-    // Logique de changement de mot de passe
-    Future.delayed(const Duration(seconds: 2), () {
+    try {
+      setState(() {
+        //passwordHach= _passwordController.text;
+        passwordHach = PasswordUtil.hashPassword(_passwordController.text);
+      });
+      AuthResponse response = await AuthService.changePassword(
+        id_number: _phoneController.text.trim(),
+        mail: _emailController.text.trim(),
+        password: passwordHach,
+      );
       setState(() {
         _isLoading = false;
       });
+      //response.isSuccess &&
+      if (response.data != null) {
+        try {
+          // 1. Afficher le message
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Mot de passe changé avec succès !'),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 2), // Temps d'affichage
+          ),
+          );
 
-      // Afficher un message de succès et retourner à la page de connexion
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Mot de passe changé avec succès !'),
-          backgroundColor: Colors.green,
-        ),
-      );
+          // 2. Attendre un court instant ou rediriger immédiatement
+          // Si vous voulez que l'utilisateur lise, ajoutez un Future.delayed
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              Navigator.pushReplacementNamed(
+                context,
+                '/login',
+              );
+            }
+          });
 
-      // Retour à la page de connexion après un délai
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pop(context);
+        } catch (e) {
+          print('Erreur lors de la redirection : $e');
+        }
+      }else {
+        // ERREUR RETOURNÉE PAR L'API (Identifiants incorrects, etc.)
+        String apiMessage = response.message;
+
+        setState(() {
+          _isLoading = false; // Arrêter le chargement
+
+          // On filtre les messages techniques de l'API pour les traduire
+          if (apiMessage.contains('noFoundIdNumberOrEmail')) {
+            _errorMessage = "Le numéro ou l'email est incorrect.";
+          } else {
+            // Message générique si l'erreur est différente
+            _errorMessage = "Erreur ";
+          }
+        });
+
+        print("Erreur API: $apiMessage");
+      }
+    } catch (e) {
+      // ERREUR TECHNIQUE (Réseau, Timeout, Crash serveur)
+      setState(() {
+        _isLoading = false;
+        if (e.toString().contains('SocketException')) {
+          _errorMessage =
+          "Pas de connexion internet. Veuillez vérifier votre réseau.";
+        } else if (e.toString().contains('TimeoutException')) {
+          _errorMessage =
+          "Le serveur met trop de temps à répondre. Réessayez plus tard.";
+        } else {
+          _errorMessage =
+          "Une erreur inattendue est survenue. Veuillez réessayer.";
+        }
       });
-    });
+      // Optionnel : imprimer l'erreur réelle dans la console pour le debug
+      debugPrint('Login Error: $e');
+    }
   }
+    // Logique de changement de mot de passe
+
 
   @override
   Widget build(BuildContext context) {
