@@ -130,6 +130,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                   const SizedBox(width: 5),
                   IconButton(onPressed: (){
+
                     _handleLogout(
                       context,
                     );

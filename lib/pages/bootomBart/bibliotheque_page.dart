@@ -17,6 +17,8 @@ class _BibliothequePageState extends State<BibliothequePage> {
     _loadUserData();
   }
   // Variables pour stocker les données de l'utilisateur
+  static const String baseUrlProfile = 'https://eduniger.com/ressources/profile/';
+
   String userName = '';
   String userEmail = '';
   String profilePic = '';
@@ -63,7 +65,7 @@ class _BibliothequePageState extends State<BibliothequePage> {
                       CircleAvatar(
                         radius:70,
                         backgroundImage: profilePic.isNotEmpty
-                            ? NetworkImage(profilePic) // Si l'URL existe
+                            ? NetworkImage( '${baseUrlProfile}${profilePic}') // Si l'URL existe
                             : const AssetImage('assets/images/user.png') as ImageProvider, // Image par défaut
 
                         //backgroundImage: const AssetImage('assets/images/user.png'),

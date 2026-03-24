@@ -365,6 +365,11 @@ class _AccueilPageState extends State<AccueilPage> {
 
 import 'dart:async';
 import 'package:eduniger/models/modelBook.dart';
+import 'package:eduniger/models/modelUser.dart';
+import 'package:eduniger/pages/Commun/detailBook.dart';
+import 'package:eduniger/services/adhere_structure_api.dart' hide AuthService;
+import 'package:eduniger/services/detache_structure_api.dart';
+import 'package:fl_custom_image_view/custom_image_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/modelAutheur.dart';
@@ -391,6 +396,7 @@ class AccueilPage extends StatefulWidget {
 class _AccueilPageState extends State<AccueilPage> {
   //final String baseUrl = "https://votre-domaine.com/images/logos/";
   static const String baseUrl = 'https://eduniger.com/ressources/cover/';
+  static const String baseUrlProfile = 'https://eduniger.com/ressources/profile/';
   List<String> publications = [
     'assets/pub/1.png',
     'assets/pub/2.png',
@@ -401,7 +407,7 @@ class _AccueilPageState extends State<AccueilPage> {
   List<Book> couverture = [];
   List<Structure> structure = [];
   List<Structure> structureAdd = [];
-  List<Structure> structureRecom = [];
+  //List<Structure> structureRecom = [];
   List<Author> auteurs = [];
 
   // Future pour FutureBuilder
@@ -437,9 +443,98 @@ class _AccueilPageState extends State<AccueilPage> {
       );
     });
   }
+  //gestion pour adherer a une structure
+  void _handleStructureAction(int index) async {
+    // On récupère l'élément actuel
+    final currentItem = structureAdd[index];
 
+    if (currentItem.isAdhere) {
+      // --- LOGIQUE DE DÉTACHEMENT ---
+      bool confirm = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: Colors.black45,
+          title: const Text("Se détacher",style: TextStyle(fontSize: 14,color: Colors.white),),
+          content: Text("Voulez-vous vraiment vous détacher de ${currentItem.name} ?",style: TextStyle(fontSize: 12,color: Colors.white),),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Annuler",style: TextStyle(fontSize: 12,color: Colors.white)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Confirmer", style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        ),
+      ) ?? false;
+
+      if (confirm) {
+        try {
+          final response = await DetacheStructureApi.detacher(
+            id_number: widget.IdNumber,
+            id: currentItem.id.toString(),
+          );
+
+          if (response.status == 'success') {
+            _toggleLocalState(index); // MISE À JOUR ICI
+            _showSnackBar('Vous etes détaché avec succès !', Colors.green);
+          } else {
+            _showSnackBar(response.message ?? "Erreur lors du détachement", Colors.orange);
+          }
+        } catch (e) {
+          _showSnackBar('Erreur de connexion', Colors.red);
+        }
+      }
+    } else {
+      // --- LOGIQUE D'ADHÉSION ---
+      try {
+        final response = await Aderers.adhere(
+          id_number: widget.IdNumber,
+          idStructure: currentItem.id.toString(),
+        );
+
+        if (response.status == 'success') {
+          _toggleLocalState(index); // MISE À JOUR ICI
+          _showSnackBar('Vous avez adhéré avec succès !', Colors.green);
+        } else {
+          _showSnackBar(response.message ?? "Erreur lors de l'adhésion", Colors.orange);
+        }
+      } catch (e) {
+        _showSnackBar('Erreur de connexion', Colors.red);
+      }
+    }
+  }
+
+// Petite fonction utilitaire pour alléger le code des SnackBars
+  void _showSnackBar(String message, Color color) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+  // Fonction pour mettre à jour l'état local de bouton structure
+
+  void _toggleLocalState(int index) {
+    if (!mounted) return;
+    setState(() {
+      // 1. Créer une copie de l'élément modifié
+      final updatedStructure = structureAdd[index].copyWith(
+        isAdhere: !structureAdd[index].isAdhere,
+      );
+
+      structureAdd[index] = updatedStructure;
+    });
+  }
 
   Future<void> _onRefresh() async {
+    setState(() {
+      structureAdd.clear(); // Important pour forcer le FutureBuilder à re-remplir la liste
+    });
     _loadData();
     await _dataFuture;
   }
@@ -497,9 +592,57 @@ class _AccueilPageState extends State<AccueilPage> {
           }
 
           // 4. EXTRACTION CORRECTE DES DONNÉES
-          // 4. EXTRACTION CORRECTE DES DONNÉES
-          final data = snapshot.data!;
 
+          final data = snapshot.data!;
+          // 4. EXTRACTION CORRECTE DES DONNÉES
+
+        // Extraction sécurisée via vos objets ApiResponse déjà existants
+          final booksResponse = data['recommendedBooks'] as ApiResponse<List<Book>>;
+          final structuresAddResponse = data['joinedStructures'] as ApiResponse<List<Structure>>;
+          final structuresRecomResponse = data['recommendedStructures'] as ApiResponse<List<Structure>>;
+          final authorsResponse = data['recommendedAuthors'] as ApiResponse<List<Author>>;
+
+          print('Books response success: ${booksResponse.success}');
+          print('Books data null?: ${booksResponse.data == null}');
+          print('Books count: ${booksResponse.data?.length ?? 0}');
+
+          print('Structures response success: ${structuresAddResponse.success}');
+          print('Structures data null?: ${structuresAddResponse.data == null}');
+          print('Structures count: ${structuresAddResponse.data?.length ?? 0}');
+
+          print('Structures response success: ${structuresRecomResponse.success}');
+          print('Structures data null?: ${structuresRecomResponse.data == null}');
+          print('Structures count: ${structuresRecomResponse.data?.length ?? 0}');
+
+          print('Authors response success: ${authorsResponse.success}');
+          print('Authors data null?: ${authorsResponse.data == null}');
+          print('Authors count: ${authorsResponse.data?.length ?? 0}');
+
+
+
+        // CORRECTION : Mise à jour de la liste locale des structures uniquement si elle est vide
+        // Cela permet à _toggleLocalState de garder ses changements après un setState
+          couverture = booksResponse.data ?? [];
+          auteurs = authorsResponse.data ?? [];
+
+          if (structureAdd.isEmpty) {
+            // On récupère les données des réponses API
+            final List<Structure> joined = structuresAddResponse.data ?? [];
+            final List<Structure> recom = structuresRecomResponse.data ?? [];
+
+            // On s'assure que le flag isAdhere est bien positionné au départ
+            final joinedMapped = joined.map((s) => s.copyWith(isAdhere: true)).toList();
+            final recomMapped = recom.map((s) => s.copyWith(isAdhere: false)).toList();
+
+            // Fusion et limite à 6
+            structureAdd = [...joinedMapped, ...recomMapped].toList();
+            print('StructureAdd fusionnée : ${structureAdd.length} éléments');
+          }
+
+          return _buildContentState();
+
+
+        /*
           print('Data keys: ${data.keys}');
 
           // Extraction avec vérification
@@ -527,8 +670,24 @@ class _AccueilPageState extends State<AccueilPage> {
 
 // Mise à jour des listes locales
           couverture = booksResponse.data ?? [];
+          /*
           structureAdd = structuresAdd.data ?? [];
           structureRecom = structuresRecom.data ?? [];
+          structure = structureAdd + structureRecom;
+          */
+
+          // Mise à jour de la liste locale limitée à 6
+          if (structureAdd.isEmpty) {
+            // Votre logique de regroupement ici
+            final List<Structure> joined = (snapshot.data!['structuresAdd'] as List)
+                .map((json) => Structure.fromJson(json, isAdhere: true)).toList();
+            final List<Structure> recom = (snapshot.data!['structuresRecom'] as List)
+                .map((json) => Structure.fromJson(json, isAdhere: false)).toList();
+
+            structureAdd = [...joined, ...recom].take(6).toList();
+          }
+
+          structureAdd.take(7).toList();
           auteurs = authorsResponse.data ?? [];
 
           print('\n✅ UI Lists updated:');
@@ -545,10 +704,12 @@ class _AccueilPageState extends State<AccueilPage> {
           }
 
           // 5. AFFICHAGE DU CONTENU
+          return _buildContentState();
           return RefreshIndicator(
           onRefresh: _onRefresh,
           child: _buildContentState(),
           );
+          */
         },
       ),
     );
@@ -1030,46 +1191,72 @@ class _AccueilPageState extends State<AccueilPage> {
               scrollDirection: Axis.horizontal,
               itemCount: couverture.length < 6 ? couverture.length : 6,
               itemBuilder: (context, index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    border: Border.all(color: Colors.grey, width: 1),
+                return InkWell(
+                  onTap:(){
+                    Navigator.push(context, MaterialPageRoute(builder:(context)=>Detailbook(
+                        idBook:couverture[index].idBook!,
+                        idUser: widget.IdNumber) ));
+                  } ,
+                  child:
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      border: Border.all(color: Colors.grey, width: 1),
+                    ),
+                    child:  ClipRRect(
+
+                      borderRadius: BorderRadius.circular(10),
+                  child: Image.network( '$baseUrl${couverture[index].blanket!}',
+                  fit: BoxFit.cover,
+                  width: 100,
+                  height: 150,
+                  errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                  width: 100,
+                  height: 150,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image, size: 40),
+                  );
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                  width: 100,
+                  height: 150,
+                  color: Colors.grey[300],
+                  child: Center(
+                  child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+                      : null,
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network( '$baseUrl${couverture[index].blanket!}'
-                      ,
-                      fit: BoxFit.cover,
+                  ),
+                  );
+                  },
+                  ),
+                  ),
+
+
+                    /*CustomImageView(
+                      imagePath: '$baseUrl${couverture[index].blanket!}',
                       width: 100,
                       height: 150,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
+                      fit: BoxFit.cover,
+                      errorWidget:
+                         Container(
                           width: 100,
                           height: 150,
                           color: Colors.grey[300],
                           child: const Icon(Icons.broken_image, size: 40),
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          width: 100,
-                          height: 150,
-                          color: Colors.grey[300],
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ).animate(delay: (index * 100).ms).fadeIn();
+
+                         )
+                    )*/
+
+
+                  ).animate(delay: (index * 100).ms).fadeIn(),
+                );
               },
             ),
           ),
@@ -1104,12 +1291,15 @@ class _AccueilPageState extends State<AccueilPage> {
         if (structureAdd.isEmpty)
           _buildEmptySection('Aucune structure disponible')
         else
+
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: structureAdd.length < 6 ? structureAdd.length : 6,
+            itemCount: structureAdd.length < 7 ? structureAdd.length : 7,
             itemBuilder: (context, index) {
-              return ListTile(
+              return
+                ListTile(
+
                 contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 leading: CircleAvatar(
                   radius: 35,
@@ -1139,13 +1329,14 @@ class _AccueilPageState extends State<AccueilPage> {
                   height: 35,
                   width: 100,
                   decoration: BoxDecoration(
+                    // Noir/Gris si déjà adhéré, Vert sinon
                     color: structureAdd[index].isAdhere ? Colors.black45 : Colors.green,
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () => _handleStructureAction(index), // Utilise la nouvelle logique
                     child: Text(
-                      structureAdd[index].isAdhere ? "Adhéré" : "S'adhérer",
+                      structureAdd[index].isAdhere ? "Détacher" : "S'adhérer",
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -1204,7 +1395,7 @@ class _AccueilPageState extends State<AccueilPage> {
                         radius: 30,
                         backgroundColor: Colors.grey[200], // Fond gris clair plus visible que white12
                         backgroundImage: (auteurs[index].profile != null && auteurs[index].profile!.isNotEmpty)
-                            ? NetworkImage('$baseUrl${auteurs[index].profile}')
+                            ? NetworkImage('$baseUrlProfile${auteurs[index].profile}')
                             : null,
                         onBackgroundImageError: (exception, stackTrace) {
                           // Cette fonction attrape l'erreur si l'image 404 ou URL invalide
