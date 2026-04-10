@@ -112,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
         String accessToken = response.data!.accessToken;
         //print("Token : $accessToken");
         //print("Utilisateur :${user}");
-
+        /*
         try {
           await DatabaseHelper.instance.saveUser(user, accessToken);
           print("Utilisateur sauvegardé localement");
@@ -136,6 +136,7 @@ class _LoginPageState extends State<LoginPage> {
           print("Erreur SQL : $dbError");
           // En cas d'erreur DB, on utilise quand même l'ID de l'API pour ne pas bloquer l'utilisateur
         }
+        */
         //print(accessToken);
         //print(user.name);
         /*

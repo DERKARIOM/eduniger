@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/modelUser.dart';
+
+import '../features/utilisateurs/models/user_model.dart';
+
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -80,7 +82,7 @@ class DatabaseHelper {
 
 
   // Sauvegarder l'utilisateur
-  Future<void> saveUser(User user, String token) async {
+  Future<void> saveUser(UserModel user, String token) async {
     final db = await instance.database;
 
     // Utilisation d'une transaction pour garantir que le delete et l'insert se font ensemble
@@ -92,11 +94,11 @@ class DatabaseHelper {
       await txn.insert(
         'users',
         {
-          'id': user.id,
-          'name': user.name,
-          'firstName': user.firstName,
-          'email': user.email,
-          'profile': user.profile,
+          'id': user.idantifiant,
+          'name': user.nom,
+          'firstName': user.prenom,
+          'email': user.mail,
+          'profile': user.profession,
           'profession': user.profession,
           'role': user.role,
           'token': token,
