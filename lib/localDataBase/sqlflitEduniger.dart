@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import '../features/livres/models/book_model.dart';
 import '../features/utilisateurs/models/user_model.dart';
 
 
@@ -55,6 +57,24 @@ class DatabaseHelper {
         idNumber TEXT
       );
     ''');
+      await db.execute ('''
+  CREATE TABLE IF NOT EXISTS livres_telecharges (
+    id            INTEGER PRIMARY KEY,
+    titre         TEXT    NOT NULL,
+    auteur        TEXT,
+    couverture    TEXT,
+    categorie     TEXT,
+    type          TEXT,
+    fichier_local TEXT,    -- chemin local du fichier téléchargé
+    fichier_url   TEXT,    -- URL d'origine
+    vues          INTEGER DEFAULT 0,
+    likes         INTEGER DEFAULT 0,
+    dislikes      INTEGER DEFAULT 0,
+    est_abonne    INTEGER DEFAULT 0,
+    date_telecharge TEXT
+  );
+''');
+
   }
 //sauvegarder numero
   Future<void> saveIdNumber(String idNumber) async {
@@ -144,4 +164,75 @@ class DatabaseHelper {
     // Supprime toutes les lignes de la table users
     await db.delete('users');
   }
+  /*
+  //////gestion des livre
+// À ajouter dans sqlflitEduniger.dart
+
+// ── Création de la table livres_telecharges ──────────────────────────
+
+// ── Sauvegarder un livre téléchargé ─────────────────────────────────
+  Future<void> saveBookTelecharge(BookModel book, String cheminLocal) async {
+    final db = await database;
+    await db.insert(
+      'livres_telecharges',
+      {
+        'id'             : book.id,
+        'titre'          : book.Titre,
+        'couverture'     : book.couverture,
+        'categorie'      : book.categorie,
+        'type'           : book.type,
+        'fichier_local'  : cheminLocal,
+        'fichier_url'    : book.fichier,
+        'vues'           : book.vues,
+        'likes'          : book.likes,
+        'dislikes'       : book.dislikes,
+        'est_abonne'     : book.estAbonne ? 1 : 0,
+        'date_telecharge': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    debugPrint("✅ Livre ${book.titre} sauvegardé localement");
+  }
+
+// ── Récupérer tous les livres téléchargés ────────────────────────────
+  Future<List<BookModel>> getBooksTelecharges() async {
+    final db   = await database;
+    final rows = await db.query('livres_telecharges');
+    return rows.map((row) => BookModel(
+      id           : row['id']       as int,
+      titre        : row['titre']    as String,
+      auteur       : row['auteur']   as String? ?? '',
+      couverture   : row['couverture'] as String? ?? '',
+      categorie    : row['categorie'] as String? ?? '',
+      type         : row['type']     as String? ?? '',
+      // fichier = chemin local pour la lecture hors-ligne
+      fichier      : row['fichier_local'] as String? ?? '',
+      vues         : row['vues']     as int? ?? 0,
+      likes        : row['likes']    as int? ?? 0,
+      dislikes     : row['dislikes'] as int? ?? 0,
+      estAbonne    : (row['est_abonne'] as int? ?? 0) == 1,
+      estTelecharge: true,
+    )).toList();
+  }
+
+// ── Vérifier si un livre est déjà téléchargé ────────────────────────
+  Future<bool> isBookTelecharge(int idBook) async {
+    final db  = await database;
+    final res = await db.query(
+      'livres_telecharges',
+      where: 'id = ?', whereArgs: [idBook],
+    );
+    return res.isNotEmpty;
+  }
+
+// ── Supprimer un livre téléchargé ────────────────────────────────────
+  Future<void> deleteBookTelecharge(int idBook) async {
+    final db = await database;
+    await db.delete(
+      'livres_telecharges',
+      where: 'id = ?', whereArgs: [idBook],
+    );
+    debugPrint("🗑️ Livre $idBook supprimé localement");
+  }
+  */
 }

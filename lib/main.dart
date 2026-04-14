@@ -1,6 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:eduniger/utils/Routeur.dart';
 import 'package:eduniger/utils/themeperso.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -15,6 +16,7 @@ import 'features/utilisateurs/view_models/user_view_model.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
+  await Firebase.initializeApp();
   // On récupère l'instance unique du Singleton
   AppState appState = AppState();
 
@@ -35,15 +37,7 @@ class EduNigerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // On écoute AppState pour mettre à jour le thème dynamiquement
     context.watch<AppState>();
-    return AdaptiveTheme(
-        light: ThemeData.light(useMaterial3: true
-        ),
-        dark: ThemeData.dark(useMaterial3: true
-
-        ),
-        initial: AdaptiveThemeMode.light,
-        //initial: savedThemeMode ?? AdaptiveThemeMode.light,
-        builder: (theme, darkTheme) =>
+    return
         MaterialApp(
         debugShowCheckedModeBanner: false,
         initialRoute: Routeur.routeInitiale,
@@ -59,13 +53,12 @@ class EduNigerApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        theme: theme,
-        darkTheme: darkTheme,
-        // On utilise l'instance du provider 'state'
+        theme: ThemePerso.ModeClaire,
+        darkTheme: ThemePerso.ModeSombre,
 
-        // themeMode: AppState().themeChoisie ?? ThemeMode.system,
-            ),
-    );
+         themeMode: AppState().themeChoisie ?? ThemeMode.system,
+        );
+
 
   }
 }

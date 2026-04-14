@@ -63,6 +63,7 @@ class UserViewModel extends ChangeNotifier {
     _firebaseToken = await _getFirebaseToken();
     _appVersion    = await _getAppVersion();
     appState.update((){});
+    //appState.initialiserBookVM(_currentUser!.numero, _appVersion);
     //notifyListeners();
   }
 
@@ -102,7 +103,8 @@ class UserViewModel extends ChangeNotifier {
   // CONNEXION
   // ══════════════════════════════════════════════════════════════════════
   Future<void> login(String numero, String password) async {
-
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission();
     // 1. Validation via UserModel
     try {
       UserModel(
@@ -118,16 +120,18 @@ class UserViewModel extends ChangeNotifier {
       appState.update((){});
       return;
     }
+    String? token = await messaging.getToken();
+    print("FCM Token: $token");
     appState.update((){
       _startLoading();
       _loginSuccess = false;
 
     });
-    print("${numero} ${password} ${_firebaseToken} ${_appVersion}");
+    print("${numero} ${password} ${token} ${_appVersion}");
 
     try {
       final user = await repositorie.seconecter(
-        numero, _hashPassword(password), _firebaseToken, _appVersion,
+        numero, _hashPassword(password), token!, _appVersion,
       );
       await _saveUserLocally(user, numero);
       _currentUser  = user;

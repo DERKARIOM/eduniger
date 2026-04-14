@@ -49,6 +49,8 @@ dependencies:
   fl_custom_image_view: ^1.0.1
   provider: ^6.1.5+1
   adaptive_theme: ^3.7.2
+  firebase_core: ^2.32.0
+
 
 dev_dependencies:
   flutter_test:

@@ -47,14 +47,14 @@ class _LoginPageState extends State<user_view_login> {
         if (vm.loginSuccess) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             vm.resetLoginSuccess();
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushReplacementNamed(context, '/mainPage');
           });
         }
 
         return Scaffold(
           body: Container(
             height: double.infinity,
-            /*
+
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -62,7 +62,7 @@ class _LoginPageState extends State<user_view_login> {
                 colors: [Colors.blue, Colors.white70],
               ),
             ),
-            */
+
             child: SafeArea(
               child: SingleChildScrollView(
                 child: Padding(
@@ -219,7 +219,7 @@ class _LoginPageState extends State<user_view_login> {
 
 
                           style: ElevatedButton.styleFrom(
-                            //backgroundColor: Colors.blue,
+                            backgroundColor: Colors.blue,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
