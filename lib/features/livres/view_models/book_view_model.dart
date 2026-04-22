@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:eduniger/appstate.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -6,14 +7,15 @@ import '../../../localDataBase/sqlflitEduniger.dart';
 import '../models/book_model.dart';
 import '../models/detaille_book_model.dart';
 import '../repositories/book_repository.dart';
-/*
+
 class BookViewModel extends ChangeNotifier {
   final BookRepository repositorie;
+  final AppState appState;
   final String numero;      // ← ID de l'utilisateur connecté
   final String version;     // ← version de l'app
-
   BookViewModel({
     required this.repositorie,
+    required this.appState,
     required this.numero,
     required this.version,
   }) {
@@ -23,13 +25,13 @@ class BookViewModel extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
   // ÉTAT
   // ══════════════════════════════════════════════════════════════════════
-  List<BookModel> _livres            = [];
-  List<BookModel> _livresRecomandes  = [];
-  List<BookModel> _livresElectro     = [];
-  List<BookModel> _livresAudio       = [];
-  List<BookModel> _livresTelecharges = [];
-  List<BookModel> _livresEmpruntes   = [];
-  List<BookModel> _livresLocaux      = [];   // ← stockés en local SQLite
+  List<Book> _livres            = [];
+  List<Book> _livresRecomandes  = [];
+  List<Book> _livresElectro     = [];
+  List<Book> _livresAudio       = [];
+  List<DetailleBookModel> _livresTelecharges = [];
+  List<Book> _livresEmpruntes   = [];
+  List<DetailleBookModel> _livresLocaux      = [];   // ← stockés en local SQLite
 
   DetailleBookModel? _detailLivre;
   String  _errorMessage        = '';
@@ -40,13 +42,13 @@ class BookViewModel extends ChangeNotifier {
   String  _actionMessage       = '';   // retour des actions like/vue/etc.
 
   // ── Getters ────────────────────────────────────────────────────────
-  List<BookModel>    get livres            => _livres;
-  List<BookModel>    get livresRecomandes  => _livresRecomandes;
-  List<BookModel>    get livresElectro     => _livresElectro;
-  List<BookModel>    get livresAudio       => _livresAudio;
-  List<BookModel>    get livresTelecharges => _livresTelecharges;
-  List<BookModel>    get livresEmpruntes   => _livresEmpruntes;
-  List<BookModel>    get livresLocaux      => _livresLocaux;
+  List<Book>    get livres            => _livres;
+  List<Book>    get livresRecomandes  => _livresRecomandes;
+  List<Book>    get livresElectro     => _livresElectro;
+  List<Book>    get livresAudio       => _livresAudio;
+  List<DetailleBookModel>    get livresTelecharges => _livresTelecharges;
+  List<Book>    get livresEmpruntes   => _livresEmpruntes;
+  List<DetailleBookModel>    get livresLocaux      => _livresLocaux;
   DetailleBookModel? get detailLivre       => _detailLivre;
   String             get errorMessage      => _errorMessage;
   bool               get isLoading         => _isLoading;
@@ -62,7 +64,7 @@ class BookViewModel extends ChangeNotifier {
     // Chargement parallèle pour gagner du temps
     await Future.wait([
       chargerLivres(),
-      chargerRecomandes(),
+      //chargerRecomandes(),
       chargerLivresLocaux(),   // ← livres hors-ligne dès le démarrage
     ]);
   }
@@ -73,14 +75,14 @@ class BookViewModel extends ChangeNotifier {
   Future<void> chargerLivres() async {
     _startLoading();
     try {
-      _livres = await repositorie.livres(numero, version);
+      _livres = await repositorie.livres(appState.numeroUtilisateur);
     } catch (e) {
       _errorMessage = _mapError(e.toString());
     } finally {
       _stopLoading();
     }
   }
-
+/*
   Future<void> chargerRecomandes() async {
     try {
       _livresRecomandes = await repositorie.livreRecomander(numero, version);
@@ -89,7 +91,7 @@ class BookViewModel extends ChangeNotifier {
       debugPrint("Recomandés : ${e.toString()}");
     }
   }
-
+*/
   Future<void> chargerElectroniques() async {
     _startLoading();
     try {
@@ -207,10 +209,10 @@ class BookViewModel extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
 
   /// Télécharge le fichier du livre et le stocke localement
-  Future<void> telechargerLivre(BookModel book) async {
+  Future<void> telechargerLivre(DetailleBookModel book) async {
     // Vérifier si déjà téléchargé
     final dejaTelechage = await DatabaseHelper.instance
-        .isBookTelecharge(book.id);
+        .isBookTelecharge(book.id, numero);
     if (dejaTelechage) {
       _actionMessage = 'deja_telecharge';
       notifyListeners();
@@ -225,7 +227,7 @@ class BookViewModel extends ChangeNotifier {
     try {
       // 1. Récupérer le dossier local de l'app
       final dir        = await getApplicationDocumentsDirectory();
-      final extension  = book.type == 'audio' ? 'mp3' : 'pdf';
+      final extension  = book.est_electronique == true ? 'pdf' : book.est_audio==true ? 'mp3' : 'null';
       final cheminLocal= '${dir.path}/livres/${book.id}.$extension';
 
       // Créer le dossier si nécessaire
@@ -254,7 +256,7 @@ class BookViewModel extends ChangeNotifier {
       client.close();
 
       // 3. Sauvegarder en base locale SQLite
-      await DatabaseHelper.instance.saveBookTelecharge(book, cheminLocal);
+      await DatabaseHelper.instance.saveBookTelecharge(book, cheminLocal, numero,);
 
       // 4. Rafraîchir la liste locale
       await chargerLivresLocaux();
@@ -274,7 +276,7 @@ class BookViewModel extends ChangeNotifier {
   /// Charger les livres stockés localement (hors-ligne)
   Future<void> chargerLivresLocaux() async {
     try {
-      _livresLocaux = await DatabaseHelper.instance.getBooksTelecharges();
+      _livresLocaux = await DatabaseHelper.instance.getBooksTelecharges( numero);
       notifyListeners();
     } catch (e) {
       debugPrint("Erreur chargement local : $e");
@@ -282,7 +284,7 @@ class BookViewModel extends ChangeNotifier {
   }
 
   /// Supprimer un livre téléchargé (fichier + base locale)
-  Future<void> supprimerLivreLocal(BookModel book) async {
+  Future<void> supprimerLivreLocal(DetailleBookModel book,String numero) async {
     try {
       // 1. Supprimer le fichier physique
       final file = File(book.fichier);
@@ -291,7 +293,7 @@ class BookViewModel extends ChangeNotifier {
         debugPrint("🗑️ Fichier supprimé : ${book.fichier}");
       }
       // 2. Supprimer de la base SQLite
-      await DatabaseHelper.instance.deleteBookTelecharge(book.id);
+      await DatabaseHelper.instance.deleteBookTelecharge(book.id, numero);
       // 3. Rafraîchir la liste
       await chargerLivresLocaux();
 
@@ -302,8 +304,8 @@ class BookViewModel extends ChangeNotifier {
   }
 
   /// Vérifier si un livre est disponible hors-ligne
-  Future<bool> estDisponibleHorsLigne(int idBook) async {
-    return DatabaseHelper.instance.isBookTelecharge(idBook);
+  Future<bool> estDisponibleHorsLigne(String idBook) async {
+    return DatabaseHelper.instance.isBookTelecharge(idBook, numero);
   }
 
   // ══════════════════════════════════════════════════════════════════════
@@ -343,4 +345,3 @@ class BookViewModel extends ChangeNotifier {
     return 'Une erreur inattendue est survenue.';
   }
 }
-*/

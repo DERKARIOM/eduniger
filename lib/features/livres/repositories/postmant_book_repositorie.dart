@@ -29,103 +29,67 @@ class PostmantBookRepositorie implements BookRepository {
   static const String _livreEmprunterEndpoint  = '/borrowed_books.php';
 
 
+
   @override
-  Future<List<BookModel>> livres(String numero, String version) async {
+  Future<List<Book>> livres(String numero) async
+  {
     try {
+      // CHANGEMENT ICI : 'POST' au lieu de 'GET'
       var request = http.MultipartRequest(
         'POST',
         Uri.parse('$_baseUrl$_livresEndpoint'),
       );
 
-      request.fields['id_user'] = numero;
-      request.fields['version'] = version;
-      request.headers['Accept'] = 'application/json';
-
-      var streamedResponse = await request.send();
-      var response         = await http.Response.fromStream(streamedResponse);
-      String responseBody  = response.body.trim();
-      BookDto bookDto;
-      List<BookModel> livres = [];
-        bookDto = BookDto.fromJson(jsonDecode(responseBody));
-      livres.add(BookModel(
-        id: bookDto.idBook ?? '',
-        couverture: bookDto.blanket ??'',
-        Titre: bookDto.bookTitle ??'',
-        idantifiant_Categorie: bookDto.idCategories ?? 0,
-        titre_categorie: bookDto.categoryTitle ??'',
-        est_pysique: bookDto.isPhysic ?? false,
-        est_electronique: bookDto.electronic ??'',
-        est_audio: bookDto.isAudio ?? false,
-        nombre_jaime: bookDto.numberLike ?? 0,
-        nombre_vue: bookDto.numberView ?? 0,
-        nom_structure: bookDto.nameStruct ??'',
-        derniere_date: bookDto.lastDate ??'',
-      ));
-
-      return livres;
-
-    } on SocketException {
-      throw Exception('pasDeConnexion');
-    } catch (e) { rethrow; }
-  }
-
-  @override
-  Future<List<BookModel>> livreRecomander(String numero, String version) async {
-    try {
-
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$_baseUrl$_livreRecomandEndpoint'),
-      );
-
       request.fields['id_number'] = numero;
-      request.fields['version'] = version;
       request.headers['Accept'] = 'application/json';
 
       var streamedResponse = await request.send();
       var response         = await http.Response.fromStream(streamedResponse);
       String responseBody  = response.body.trim();
-      BookDto bookDto;
-      List<BookModel> livres = [];
-      bookDto = BookDto.fromJson(jsonDecode(responseBody));
-      livres.add(BookModel(
-        id: bookDto.idBook ?? '',
-        couverture: bookDto.blanket ??'',
-        Titre: bookDto.bookTitle ??'',
-        idantifiant_Categorie: bookDto.idCategories ?? 0,
-        titre_categorie: bookDto.categoryTitle ??'',
-        est_pysique: bookDto.isPhysic ?? false,
-        est_electronique: bookDto.electronic ??'',
-        est_audio: bookDto.isAudio ?? false,
-        nombre_jaime: bookDto.numberLike ?? 0,
-        nombre_vue: bookDto.numberView ?? 0,
-        nom_structure: bookDto.nameStruct ??'',
-        derniere_date: bookDto.lastDate ??'',
-      ));
+      debugPrint("Livres body : $responseBody");
 
+      List<Book> livres = [];
+      if (response.statusCode == 200 && responseBody.isNotEmpty) {
+        final dynamic jsonData = jsonDecode(responseBody);
+
+        // Sécurité supplémentaire : vérifier si le résultat est bien une liste
+        if (jsonData is List) {
+          livres = jsonData.map((json) => Book.fromJson(json)).toList();
+        } else {
+          // Si le serveur renvoie {"error": "..."}, jsonData sera un Map, pas une List
+          debugPrint("Erreur serveur : $jsonData");
+        }
+      }
+
+      debugPrint("Livres retour : ${livres.length} livres");
       return livres;
+
     } on SocketException {
       throw Exception('pasDeConnexion');
-    } catch (e) { rethrow; }
+    } catch (e) {
+      debugPrint("Erreur Exception : $e");
+      rethrow;
+    }
   }
 
+
   @override
-  Future<List<BookModel>> livreElectronique(String numero) async {
+  Future<List<Book>> livreElectronique(String numero) async {
     throw Exception('non implanter');
   }
 
   @override
-  Future<List<BookModel>> livreAudio(String numero) async {
+  Future<List<Book>> livreAudio(String numero) async {
     throw Exception('non implanter');
   }
 
   @override
-  Future<List<BookModel>> livreTelecharger(String numero, String version) async {
+  Future<List<Book>> livreTelecharger(String numero, String version) async {
     throw Exception('non implanter');
   }
 
   @override
-  Future<List<BookModel>> livreEmprunter(String numero) async {
+  Future<List<Book>> livreEmprunter(String numero) async {
     throw Exception('non implanter');
   }
 
@@ -165,10 +129,8 @@ class PostmantBookRepositorie implements BookRepository {
     throw UnimplementedError();
   }
 
-  // ══════════════════════════════════════════════════════════════════════
-  // DÉTAIL
-  // ══════════════════════════════════════════════════════════════════════
-  /*
+
+    /*
   @override
   Future<DetailleBookModel> detail(String numero, String idBook) async
   {

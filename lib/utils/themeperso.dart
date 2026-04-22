@@ -206,7 +206,7 @@ abstract class ThemePerso {
       color: separator,
       thickness: 1,
     ),
-
+/*
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: white3,
@@ -226,7 +226,7 @@ abstract class ThemePerso {
         horizontal: 16, vertical: 14,
       ),
     ),
-
+*/
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: bleu,

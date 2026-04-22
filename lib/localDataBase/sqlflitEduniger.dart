@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../features/livres/models/book_model.dart';
+import '../features/livres/models/detaille_book_model.dart';
 import '../features/utilisateurs/models/user_model.dart';
 
 
@@ -57,19 +58,25 @@ class DatabaseHelper {
         idNumber TEXT
       );
     ''');
-      await db.execute ('''
+      // Créer la table livres_telecharges
+      await db.execute('''
   CREATE TABLE IF NOT EXISTS livres_telecharges (
-    id            INTEGER PRIMARY KEY,
-    titre         TEXT    NOT NULL,
+    id            TEXT PRIMARY KEY,
+    numero        TEXT,
+    titre         TEXT NOT NULL,
     auteur        TEXT,
     couverture    TEXT,
     categorie     TEXT,
-    type          TEXT,
-    fichier_local TEXT,    -- chemin local du fichier téléchargé
-    fichier_url   TEXT,    -- URL d'origine
+    est_pysique   INTEGER,
+    est_electronique INTEGER,
+    est_audio     INTEGER,
+    fichier_local TEXT,
+    fichier_url   TEXT,
     vues          INTEGER DEFAULT 0,
     likes         INTEGER DEFAULT 0,
     dislikes      INTEGER DEFAULT 0,
+    nombre_abonne INTEGER DEFAULT 0,
+    nombre_page   INTEGER DEFAULT 0,
     est_abonne    INTEGER DEFAULT 0,
     date_telecharge TEXT
   );
@@ -96,8 +103,22 @@ class DatabaseHelper {
     }
     return null;
   }
+  //recupere le tocken
+  // Récupérer le token de l'utilisateur connecté
+  Future<String?> gettoken() async {
+    final db = await instance.database;
+    // On cherche dans la table 'users' et on ne sélectionne que la colonne 'token'
+    final maps = await db.query(
+        'users',
+        columns: ['token'],
+        limit: 1
+    );
 
-
+    if (maps.isNotEmpty && maps.first['token'] != null) {
+      return maps.first['token'] as String;
+    }
+    return null;
+  }
 
 
 
@@ -145,6 +166,7 @@ class DatabaseHelper {
       return null;
     }
   }
+
   //verification de durrer de session
   Future<bool> isSessionValid() async {
     final userData = await getUser();
@@ -164,29 +186,34 @@ class DatabaseHelper {
     // Supprime toutes les lignes de la table users
     await db.delete('users');
   }
-  /*
+
   //////gestion des livre
 // À ajouter dans sqlflitEduniger.dart
 
 // ── Création de la table livres_telecharges ──────────────────────────
 
 // ── Sauvegarder un livre téléchargé ─────────────────────────────────
-  Future<void> saveBookTelecharge(BookModel book, String cheminLocal) async {
+  Future<void> saveBookTelecharge(DetailleBookModel book, String cheminLocal,String numero) async {
     final db = await database;
     await db.insert(
       'livres_telecharges',
       {
         'id'             : book.id,
-        'titre'          : book.Titre,
+        'numero'         : numero,
+        'titre'          : book.titre,
         'couverture'     : book.couverture,
-        'categorie'      : book.categorie,
-        'type'           : book.type,
+        'categorie'      : book.titre_categorie,
+        'est_pysique'    : book.est_pysique ? 1 : 0,
+        'est_electronique': book.est_electronique,
+        'est_audio'      : book.est_audio ? 1 : 0,
         'fichier_local'  : cheminLocal,
         'fichier_url'    : book.fichier,
-        'vues'           : book.vues,
-        'likes'          : book.likes,
-        'dislikes'       : book.dislikes,
-        'est_abonne'     : book.estAbonne ? 1 : 0,
+        'vues'           : book.nombre_vue,
+        'likes'          : book.nombre_jaime,
+        'dislikes'       : book.nombre_jaime,
+        'nombre_abonne'  : book.nombre_subscribe,
+        'nombre_page'    :book.nombre_page,
+        'est_abonne'     : book.est_abonne? 1 : 0,
         'date_telecharge': DateTime.now().toIso8601String(),
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
@@ -195,44 +222,51 @@ class DatabaseHelper {
   }
 
 // ── Récupérer tous les livres téléchargés ────────────────────────────
-  Future<List<BookModel>> getBooksTelecharges() async {
-    final db   = await database;
-    final rows = await db.query('livres_telecharges');
-    return rows.map((row) => BookModel(
-      id           : row['id']       as int,
-      titre        : row['titre']    as String,
-      auteur       : row['auteur']   as String? ?? '',
-      couverture   : row['couverture'] as String? ?? '',
-      categorie    : row['categorie'] as String? ?? '',
-      type         : row['type']     as String? ?? '',
-      // fichier = chemin local pour la lecture hors-ligne
-      fichier      : row['fichier_local'] as String? ?? '',
-      vues         : row['vues']     as int? ?? 0,
-      likes        : row['likes']    as int? ?? 0,
-      dislikes     : row['dislikes'] as int? ?? 0,
-      estAbonne    : (row['est_abonne'] as int? ?? 0) == 1,
-      estTelecharge: true,
+  // ── Récupérer tous les livres téléchargés ────────────────────────────
+
+  Future<List<DetailleBookModel>> getBooksTelecharges(String numero) async {
+    final db = await database;
+
+    // Utilisation correcte des paramètres de requête
+    final List<Map<String, dynamic>> rows = await db.query(
+      'livres_telecharges',
+      where: 'numero = ?',
+      whereArgs: [numero],
+    );
+
+    return rows.map((row) => DetailleBookModel(
+      id: row['id'] as String,
+      couverture: row['couverture'] as String,
+      titre: row['titre'] as String,
+      description: row['description'] as String,
+      titre_categorie: row['categorie'] as String,
+      est_pysique: row['est_pysique'] == 1,
+      est_electronique: row['est_electronique'] as String,
+      est_audio: row['est_audio'] == 1,
+      nombre_jaime: row['likes'] as int,
+      nombre_no_jaime: row['dislikes'] as int,
+      nombre_subscribe: row['nombre_abonne'] as int,
+      nombre_vue: row['vues'] as int,
+
     )).toList();
   }
 
 // ── Vérifier si un livre est déjà téléchargé ────────────────────────
-  Future<bool> isBookTelecharge(int idBook) async {
+  Future<bool> isBookTelecharge(String idBook,String numero) async {
     final db  = await database;
     final res = await db.query(
-      'livres_telecharges',
-      where: 'id = ?', whereArgs: [idBook],
-    );
+      'livres_telecharges', where: 'id = ? and numero = ?' ,whereArgs: [idBook,numero],);
     return res.isNotEmpty;
   }
 
 // ── Supprimer un livre téléchargé ────────────────────────────────────
-  Future<void> deleteBookTelecharge(int idBook) async {
+  Future<void> deleteBookTelecharge(String idBook, String numero) async {
     final db = await database;
     await db.delete(
-      'livres_telecharges',
-      where: 'id = ?', whereArgs: [idBook],
+      'livres_telecharges where numero = $numero and id = $idBook',
+      //where: 'id = ?', whereArgs: [idBook],
     );
     debugPrint("🗑️ Livre $idBook supprimé localement");
   }
-  */
+
 }

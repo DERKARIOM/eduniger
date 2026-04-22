@@ -149,6 +149,7 @@ class _RegisterPageState extends State<UserViewRegister> {
                               _passwordController.text,
                          _confirmPasswordController.text,
                          vm.selectedProfession,
+                        vm.firebaseToken
                       ),
 
                       style: ElevatedButton.styleFrom(

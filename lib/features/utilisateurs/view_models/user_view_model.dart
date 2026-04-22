@@ -102,7 +102,8 @@ class UserViewModel extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
   // CONNEXION
   // ══════════════════════════════════════════════════════════════════════
-  Future<void> login(String numero, String password) async {
+  Future<void> login(String numero, String password) async
+  {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     await messaging.requestPermission();
     // 1. Validation via UserModel
@@ -120,22 +121,23 @@ class UserViewModel extends ChangeNotifier {
       appState.update((){});
       return;
     }
-    String? token = await messaging.getToken();
-    print("FCM Token: $token");
+    _firebaseToken = (await messaging.getToken())!;
+    //print("FCM Token: $_firebaseToken");
     appState.update((){
       _startLoading();
       _loginSuccess = false;
 
     });
-    print("${numero} ${password} ${token} ${_appVersion}");
+    print("${numero} ${password} ${_firebaseToken} ${_appVersion}");
 
     try {
       final user = await repositorie.seconecter(
-        numero, _hashPassword(password), token!, _appVersion,
+        numero, _hashPassword(password), _firebaseToken, _appVersion,
       );
-      await _saveUserLocally(user, numero);
+      await _saveUserLocally(user,_firebaseToken ,numero);
       _currentUser  = user;
       _loginSuccess = true;
+      appState.initialiserAccueilVM(user.numero, _appVersion);
       appState.update((){});
     } catch (e) {
       _errorMessage = _mapError(e.toString());
@@ -151,9 +153,11 @@ class UserViewModel extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
   Future<void> register(
       String nom,     String prenom,   String numero,
-      String email,   String password, String confirmPassword, String selectedProfession,
-      ) async {
-
+      String email,   String password, String confirmPassword, String selectedProfession,String token
+      ) async
+  {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission();
     // 1. Validation via UserModel
     try {
       UserModel(
@@ -183,12 +187,15 @@ class UserViewModel extends ChangeNotifier {
     });
     print("${nom} ${prenom} ${numero} ${email} ${password} ${_selectedProfession}");
     try {
-
+      _firebaseToken = (await messaging.getToken())!;
+      print("FCM Token: $_firebaseToken");
+      print("${nom} ${prenom} ${numero} ${email} ${_hashPassword(password)} ${_getProfessionCode(_selectedProfession)} ${_appVersion}");
       final result = await repositorie.creer_compte(
         numero, email, nom, prenom,
         _hashPassword(password),
         _getProfessionCode(_selectedProfession),
         _appVersion,
+          _firebaseToken
       );
       // ← résultat traité séparément pour register
       _handleRegisterResult(result);
@@ -208,7 +215,8 @@ class UserViewModel extends ChangeNotifier {
   Future<void> changerMotDePasse(
       String numero, String email,
       String password, String confirmPassword,
-      ) async {
+      ) async
+  {
 
     // 1. Validation via UserModel
     try {
@@ -290,9 +298,9 @@ class UserViewModel extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
   // SAUVEGARDE LOCALE
   // ══════════════════════════════════════════════════════════════════════
-  Future<void> _saveUserLocally(UserModel user, String numero) async {
+  Future<void> _saveUserLocally(UserModel user, String token ,String numero) async {
     try {
-      await DatabaseHelper.instance.saveUser(user, user.numero);
+      await DatabaseHelper.instance.saveUser(user, token);
       debugPrint("✅ Utilisateur sauvegardé");
     } catch (e) {
       debugPrint("⚠️ Erreur SQL saveUser : $e");
@@ -300,8 +308,10 @@ class UserViewModel extends ChangeNotifier {
     try {
       await DatabaseHelper.instance.saveIdNumber(numero);
       final id = await DatabaseHelper.instance.getIdNumber();
+      final toke=await DatabaseHelper.instance.gettoken();
       _idUser = id.toString();
       debugPrint("✅ ID récupéré : $_idUser");
+      debugPrint("✅ tocken  récupére : $toke");
     } catch (e) {
       debugPrint("⚠️ Erreur SQL saveIdNumber : $e");
     }

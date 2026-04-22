@@ -7,10 +7,7 @@ import 'package:eduniger/features/utilisateurs/views/user_view_register.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../pages/login/forgot_password_page.dart';
-import '../../../pages/login/register_page.dart';
-import '../repositories/postmant_user_repositore.dart';
-import '../view_models/user_view_model.dart';
+
 
 class user_view_login extends StatefulWidget {
   const user_view_login({Key? key}) : super(key: key);

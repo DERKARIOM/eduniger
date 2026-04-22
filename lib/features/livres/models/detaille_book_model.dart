@@ -7,7 +7,9 @@ class DetailleBookModel {
    String? _titre_categorie;
    bool? _est_pysique;
    String? _est_electronique;
+   bool? _est_abonne;
    bool? _est_audio;
+   String? _fichier;
    int? _nombre_jaime;
    int? _nombre_no_jaime;
    int? _nombre_subscribe;
@@ -26,30 +28,32 @@ class DetailleBookModel {
    dynamic? _taille;
    dynamic? _nombre_page;
    DetailleBookModel({
-      required String id,
-      required String couverture,
-      required String titre,
-      required String description,
-      required String titre_categorie,
-      required bool est_pysique,
-      required String est_electronique,
-      required bool est_audio,
-      required int nombre_jaime,
-      required int nombre_no_jaime,
-      required int nombre_subscribe,
-      required int nombre_vue,
-      required String image_categorie,
-      required int id_auteur,
-      required String nom_auteur,
-      required String prenom_auteur,
-      required String profile_auteur,
-      required int disponible,
-      required String profession,
-      required String telephone,
-      required String email,
-      required String whatsapp,
-      required dynamic taille,
-      required dynamic nombre_page,
+       String? id,
+       String? couverture,
+       String? titre,
+       String? description,
+       String? titre_categorie,
+       bool? est_pysique,
+       String? est_electronique,
+       bool? est_audio,
+       int? nombre_jaime,
+       int? nombre_no_jaime,
+       bool? est_abonne,
+       int? nombre_subscribe,
+       String? fichier,
+       int? nombre_vue,
+       String? image_categorie,
+       int? id_auteur,
+       String? nom_auteur,
+       String? prenom_auteur,
+       String? profile_auteur,
+       int? disponible,
+       String? profession,
+       String? telephone,
+       String? email,
+       String? whatsapp,
+       dynamic taille,
+       dynamic nombre_page,
 }): _id=id,
    _couverture=couverture,
     _titre=titre,
@@ -100,6 +104,8 @@ bool get est_audio => _est_audio!;
 int get nombre_jaime => _nombre_jaime!;
 int get nombre_no_jaime => _nombre_no_jaime!;
 int get nombre_subscribe => _nombre_subscribe!;
+String get fichier => _fichier!;
+bool get est_abonne => _est_abonne!;
 int get nombre_vue => _nombre_vue!;
 String get image_categorie => _image_categorie!;
 int get id_auteur => _id_auteur!;

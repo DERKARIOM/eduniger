@@ -78,8 +78,9 @@ class PostmantUserRepositoie implements UserRepositorie {
   @override
   Future<String> creer_compte(
       String numero, String email, String nom,
-      String prenom, String mot_de_passe, String profession, String version,
-      ) async {
+      String prenom, String mot_de_passe, String profession, String version,String token
+      ) async
+  {
     try {
       var request = http.MultipartRequest(
         'POST',
@@ -93,6 +94,7 @@ class PostmantUserRepositoie implements UserRepositorie {
       request.fields['password'] = mot_de_passe;
       request.fields['profession'] = profession;
       request.fields['version'] = version;
+      request.fields['fcm_token'] = token;
       request.headers['Accept'] = 'application/json';
 
 
@@ -134,7 +136,8 @@ class PostmantUserRepositoie implements UserRepositorie {
     }
   }
   @override
-  Future<UserModel> seconecter(String numero, String mot_de_passe, String token, String version) async {
+  Future<UserModel> seconecter(String numero, String mot_de_passe, String token, String version) async
+  {
     //instant?.se_connecter(numero, mot_de_passe);
     try {
       var request = http.MultipartRequest(
@@ -163,7 +166,9 @@ class PostmantUserRepositoie implements UserRepositorie {
       // 2. Tentative de décodage JSON
       Map<String, dynamic> responseData;
       try {
+        print(responseBody);
         responseData = json.decode(responseBody);
+        print(responseData);
       } catch (e) {
         throw Exception("Réponse serveur invalide (Format non JSON)");
       }
@@ -172,11 +177,12 @@ class PostmantUserRepositoie implements UserRepositorie {
       // Si l'API renvoie directement l'utilisateur (format plat)
       if (responseData.containsKey('name')&&response.statusCode==200) {
         UserDto dto = UserDto.fromJson(responseData);
+        print('dto ${dto}');
         UserModel user = UserModel(
             idantifiant: dto.id,
             nom: dto.name ?? '',
             prenom: dto.firstName ?? '',
-            numero: dto.phone ?? '',
+            numero: numero,
             mail: dto.email ?? '',
             mot_de_passe: mot_de_passe,
             profession: dto.profession ?? '',
@@ -192,6 +198,7 @@ class PostmantUserRepositoie implements UserRepositorie {
       throw Exception("Données utilisateur introuvables dans la réponse");
 
     } catch (e) {
+      print(e);
       // On propage l'erreur pour qu'elle soit gérée par l'UI (avec un try/catch)
       rethrow;
     }

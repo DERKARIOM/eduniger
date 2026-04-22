@@ -10,37 +10,37 @@ class LocalBookRepositorie implements BookRepository{
   }
 
   @override
-  Future<List<BookModel>> livreAudio(String numero) {
+  Future<List<Book>> livreAudio(String numero) {
     // TODO: implement livreAudio
     throw UnimplementedError();
   }
 
   @override
-  Future<List<BookModel>> livreElectronique(String numero) {
+  Future<List<Book>> livreElectronique(String numero) {
     // TODO: implement livreElectronique
     throw UnimplementedError();
   }
 
   @override
-  Future<List<BookModel>> livreEmprunter(String numero) {
+  Future<List<Book>> livreEmprunter(String numero) {
     // TODO: implement livreEmprunter
     throw UnimplementedError();
   }
 
   @override
-  Future<List<BookModel>> livreRecomander(String numero, String version) {
+  Future<List<Book>> livreRecomander(String numero, String version) {
     // TODO: implement livreRecomander
     throw UnimplementedError();
   }
 
   @override
-  Future<List<BookModel>> livreTelecharger(String numero, String version) {
+  Future<List<Book>> livreTelecharger(String numero, String version) {
     // TODO: implement livreTelecharger
     throw UnimplementedError();
   }
 
   @override
-  Future<List<BookModel>> livres(String numero, String version) {
+  Future<List<Book>> livres(String numero) {
     // TODO: implement livres
     throw UnimplementedError();
   }
