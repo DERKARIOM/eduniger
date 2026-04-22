@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../../../appstate.dart';
 import '../service/notification_service.dart';
 
-class NotificationViewModel {
+class NotificationViewModel extends ChangeNotifier {
   final AppState appState;
 
   NotificationViewModel(this.appState);

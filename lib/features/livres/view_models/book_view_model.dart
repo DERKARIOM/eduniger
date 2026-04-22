@@ -6,26 +6,28 @@ import 'package:path_provider/path_provider.dart';
 import '../../../localDataBase/sqlflitEduniger.dart';
 import '../models/book_model.dart';
 import '../models/detaille_book_model.dart';
+import '../models/livres_model.dart';
 import '../repositories/book_repository.dart';
 
 class BookViewModel extends ChangeNotifier {
   final BookRepository repositorie;
   final AppState appState;
-  final String numero;      // ← ID de l'utilisateur connecté
-  final String version;     // ← version de l'app
-  BookViewModel({
-    required this.repositorie,
-    required this.appState,
-    required this.numero,
-    required this.version,
-  }) {
+  late String numero;      // ← ID de l'utilisateur connecté
+  late String version;     // ← version de l'app
+  BookViewModel(
+     this.repositorie,
+     this.appState,
+
+  ) {
+    numero=appState.numeroUtilisateur;
+    version=appState.version;
     _init();
   }
 
   // ══════════════════════════════════════════════════════════════════════
   // ÉTAT
   // ══════════════════════════════════════════════════════════════════════
-  List<Book> _livres            = [];
+  List<LivresModel> _livres            = [];
   List<Book> _livresRecomandes  = [];
   List<Book> _livresElectro     = [];
   List<Book> _livresAudio       = [];
@@ -42,7 +44,7 @@ class BookViewModel extends ChangeNotifier {
   String  _actionMessage       = '';   // retour des actions like/vue/etc.
 
   // ── Getters ────────────────────────────────────────────────────────
-  List<Book>    get livres            => _livres;
+  List<LivresModel>    get livres            => _livres;
   List<Book>    get livresRecomandes  => _livresRecomandes;
   List<Book>    get livresElectro     => _livresElectro;
   List<Book>    get livresAudio       => _livresAudio;

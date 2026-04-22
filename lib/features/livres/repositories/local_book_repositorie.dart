@@ -2,6 +2,8 @@ import 'package:eduniger/features/livres/models/book_model.dart';
 import 'package:eduniger/features/livres/models/detaille_book_model.dart';
 import 'package:eduniger/features/livres/repositories/book_repository.dart';
 
+import '../models/livres_model.dart';
+
 class LocalBookRepositorie implements BookRepository{
   @override
   Future<DetailleBookModel> detail(String numero, String id_book) {
@@ -40,7 +42,7 @@ class LocalBookRepositorie implements BookRepository{
   }
 
   @override
-  Future<List<Book>> livres(String numero) {
+  Future<List<LivresModel>> livres(String numero) {
     // TODO: implement livres
     throw UnimplementedError();
   }

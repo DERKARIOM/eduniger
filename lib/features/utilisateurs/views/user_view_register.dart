@@ -36,9 +36,9 @@ class _RegisterPageState extends State<UserViewRegister> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (context, appState, _)  {
-        final vm=appState.utilisa;
+    return Consumer<UserViewModel>(
+      builder: (context, vm, _)  {
+        //final vm=appState.utilisa;
         // ── Navigation après succès ──────────────────────────────────
         if (vm.registerSuccess) {
           WidgetsBinding.instance.addPostFrameCallback((_) {

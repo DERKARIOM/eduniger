@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 class MCategorie {
-  String? id;
+  int? id;
   String? cover;
   String? name;
-  String ?description;
-  bool ?isAdhere;
-  String ?banner;
-  String? author;
-  String? bookNumber;
-  String? admin;
+  int? number_inscri;
 
   // Ceci est un constructeur Dart qui initialise directement les champs.
   // On utilise `this.` pour différencier les paramètres des champs de la classe.
@@ -16,24 +11,15 @@ class MCategorie {
      this.id,
      this.cover,
      this.name,
-     this.description,
-     this.isAdhere,
-     this.banner,
-     this.author,
-     this.bookNumber,
-     this.admin,
+     this.number_inscri,
   });
 factory MCategorie.fromJson(Map<String, dynamic> json) {
   return MCategorie(
-    id: json['id'],
-    cover: json['cover'],
-    name: json['name'],
-      description: json['description'],
-      isAdhere: json['is_adhere'],
-      banner: json['banner'],
-      author: json['author'],
-      bookNumber: json['book_number'],
-      admin: json['admin'],);
+    id: json['idCategory']as int?,
+    cover: json['blanket'],
+    name: json['title'],
+      number_inscri: json['numberSubscribe'] as int?,
+  );
 
 
 

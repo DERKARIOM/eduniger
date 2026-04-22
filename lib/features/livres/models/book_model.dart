@@ -84,7 +84,7 @@ class Book {
   final bool? isAudio;
   final int? numberLike;
   final int? numberView;     // ← numberView (pas numberViw)
-  final String? idStruct;
+  final String? dStructures;
   final String? nameStruct;
   final String? lastDate;
 
@@ -99,7 +99,7 @@ class Book {
     this.isAudio,
     this.numberLike,
     this.numberView,
-    this.idStruct,
+    this.dStructures,
     this.nameStruct,
     this.lastDate,
   });
@@ -132,7 +132,7 @@ class Book {
       numberView: json['numberView'] is int
           ? json['numberView']
           : int.tryParse(json['numberView']?.toString() ?? '0') ?? 0,
-      idStruct: json['idStruct']?.toString(),
+      dStructures: json['idStruct']?.toString(),
 
       nameStruct: json['nameStruct']?.toString(),
 

@@ -1,4 +1,5 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:eduniger/features/categorie/repositorie/postmant_categorie_repositorie.dart';
 import 'package:eduniger/utils/Routeur.dart';
 import 'package:eduniger/utils/themeperso.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,7 +9,13 @@ import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'appstate.dart';
+import 'features/accueil/repositorie/pastmant_acceuil_repositorie.dart';
+import 'features/accueil/view_model/accueil_view_model.dart';
+import 'features/categorie/view_model/categorie_view_model.dart';
+import 'features/livres/repositories/postmant_book_repositorie.dart';
+import 'features/livres/view_models/book_view_model.dart';
 import 'features/notification/service/notification_service.dart';
+import 'features/notification/view_model/notification_view_model.dart';
 import 'features/utilisateurs/repositories/user_repositorie.dart';
 import 'features/utilisateurs/repositories/postmant_user_repositore.dart';
 import 'features/utilisateurs/view_models/user_view_model.dart';
@@ -61,10 +68,97 @@ void main() async {
   await appState.chargerSessionLocale();
 
   runApp(
-    ChangeNotifierProvider.value(
+    /*ChangeNotifierProvider.value(
       value: appState,
       child: EduNigerApp(savedThemeMode: savedThemeMode),
-    ),
+    ),*/
+    MultiProvider(
+
+      providers: [
+        // ── 1. AppState : état global (session, thème, urls) ──────────
+        ChangeNotifierProvider<AppState>.value(
+          value: appState,
+        ),
+
+        // ── 2. UserViewModel : connexion / inscription / mot de passe ─
+        ChangeNotifierProvider<UserViewModel>(
+          create: (_) => UserViewModel(
+            PostmantUserRepositoie(),
+            appState,
+          ),
+        ),
+
+        // ── 3. NotificationViewModel ───────────────────────────────────
+        ChangeNotifierProvider<NotificationViewModel>(
+          create: (_) => NotificationViewModel(appState),
+        ),
+
+        // ── 4. AccueilViewModel : chargé seulement si connecté ─────────
+        // Utilise lazy: true (défaut) → créé au premier accès
+
+        ChangeNotifierProxyProvider<AppState, AccueilViewModel>(
+          // create : valeur initiale (avant le premier update)
+          create: (_) => AccueilViewModel(
+            PostmantAccueilRepository(),
+            appState,
+          ),
+          // update : recréé quand AppState change (ex: après login)
+          update: (_, appState, previous) {
+            // Si le numéro a changé (après login), on recrée le VM
+            if (previous?.numero != appState.numeroUtilisateur &&
+                appState.estConnecter) {
+              return AccueilViewModel(
+                PostmantAccueilRepository(),
+                appState,
+              );
+            }
+            return previous ??
+                AccueilViewModel(PostmantAccueilRepository(), appState);
+          },
+        ),
+
+        ChangeNotifierProxyProvider<AppState, CategorieViewModel>(
+          // create : valeur initiale (avant le premier update)
+          create: (_) => CategorieViewModel(
+            PostmantCategorieRepositorie(),
+            appState,
+          ),
+          // update : recréé quand AppState change (ex: après login)
+          update: (_, appState, previous) {
+            // Si le numéro a changé (après login), on recrée le VM
+            if (previous?.numero != appState.numeroUtilisateur &&
+                appState.estConnecter) {
+              return CategorieViewModel(
+                PostmantCategorieRepositorie(),
+                appState,
+              );
+            }
+            return previous ??
+                CategorieViewModel(PostmantCategorieRepositorie(), appState);
+          },
+        ),
+
+        // ── 5. BookViewModel : même logique ───────────────────────────
+        ChangeNotifierProxyProvider<AppState, BookViewModel>(
+          create: (_) => BookViewModel(
+            PostmantBookRepositorie(),
+            appState,
+          ),
+          update: (_, appState, previous) {
+            if (previous?.numero != appState.numeroUtilisateur &&
+                appState.estConnecter) {
+              return BookViewModel(
+                PostmantBookRepositorie(),
+                appState,
+              );
+            }
+            return previous ??
+                BookViewModel(PostmantBookRepositorie(), appState);
+          },
+        ),
+      ],
+      child: EduNigerApp(savedThemeMode: savedThemeMode),
+    )
   );
 }
 
@@ -99,7 +193,34 @@ class EduNigerApp extends StatelessWidget {
     );
   }
 }
+class DispatcherPage extends StatelessWidget {
+  const DispatcherPage({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    // ← isInitialized : attend que la session locale soit chargée
+    return Consumer<AppState>(
+      builder: (context, appState, _) {
+        // Chargement en cours
+        if (!appState.isInitialized) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(color: Colors.green),
+            ),
+          );
+        }
+
+        // Redirige selon l'état de connexion
+        if (appState.estConnecter) {
+          return Routeur.route['/mainPage']!(context);
+        } else {
+          return Routeur.route['/logine']!(context);
+        }
+      },
+    );
+  }
+}
+/*
 class DispatcherPage extends StatelessWidget {
   const DispatcherPage({super.key});
 
@@ -113,3 +234,4 @@ class DispatcherPage extends StatelessWidget {
     }
   }
 }
+*/

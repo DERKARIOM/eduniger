@@ -2,6 +2,7 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:eduniger/appstate.dart';
 import 'package:eduniger/features/utilisateurs/models/user_model.dart';
+import 'package:eduniger/features/utilisateurs/view_models/user_view_model.dart';
 import 'package:eduniger/features/utilisateurs/views/user_view_change_password.dart';
 import 'package:eduniger/features/utilisateurs/views/user_view_register.dart';
 import 'package:flutter/material.dart';
@@ -36,9 +37,9 @@ class _LoginPageState extends State<user_view_login> {
   @override
   Widget build(BuildContext context) {
     // Consumer reconstruit uniquement ce widget quand le ViewModel notifie
-    return Consumer<AppState>(
-      builder: (context, appState, _) {
-        final vm=appState.utilisa;
+    return Consumer<UserViewModel>(
+      builder: (context, vm, _) {
+       // final vm=appState.utilisa;
         // ── Navigation après connexion réussie ─────────────────────────
         // addPostFrameCallback évite d'appeler Navigator pendant un build
         if (vm.loginSuccess) {
@@ -168,10 +169,11 @@ class _LoginPageState extends State<user_view_login> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed:(){ appState.update((){
+                          onPressed:(){
+                           // appState.update((){ });
                             vm.clearError();
                             Navigator.push(context, MaterialPageRoute(builder: (_) => UserViewChangePassword()));
-                          });
+
                           },
 
                           child: const Text(
@@ -284,10 +286,11 @@ class _LoginPageState extends State<user_view_login> {
                             style: TextStyle( fontSize: 10),
                           ),
                           TextButton(
-                            onPressed:(){ appState.update((){
+                            onPressed:(){
+                              //appState.update((){});
                               vm.clearError();
                               Navigator.push(context, MaterialPageRoute(builder: (_) => UserViewRegister()));
-                              });
+
                               },
                             child: const Text(
                               'Créer un compte',

@@ -1,3 +1,4 @@
+import 'package:eduniger/features/livres/view_models/book_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
@@ -12,12 +13,12 @@ class Livre extends StatefulWidget {
 }
 
 class _LivreState extends State<Livre> {
-  AppState get appState => context.read<AppState>();
+  AppState get appState => context.watch<AppState>();
 
   @override
   void initState() {
     super.initState();
-
+/*
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // On initialise le VM
       appState.initialiserLivresVM(appState.numeroUtilisateur, appState.version);
@@ -25,6 +26,7 @@ class _LivreState extends State<Livre> {
       // On vérifie s'il existe avant de charger (utilisation du ?.)
       appState.livres?.chargerLivres();
     });
+    */
   }
 
 
@@ -32,17 +34,11 @@ class _LivreState extends State<Livre> {
   @override
   Widget build(BuildContext context) {
     return
-      Consumer<AppState>(
-        builder: (context, appState, _) {
-          final vm = appState.livres;
-              print(' les livres  recupere sont :${vm?.livres}');
-          // Sécurité si initialiserLivresVM n'a pas encore fini
-          // PROTECTION : Si vm est null (pas encore initialisé), on affiche un loader
-          if (vm == null) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
+      Consumer<BookViewModel>(
+        builder: (context, vm, _) {
+          //final vm = appState.livres;
+              print(' les livres  recupere sont :${vm.livres}');
+
           if (vm.isLoading && vm.livres.isEmpty) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
@@ -87,7 +83,7 @@ class _LivreState extends State<Livre> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(10),
                                   child: Image.network(
-                                    "${appState.baseUrlCover}${book.idStruct}/blankets/${book.blanket}",
+                                    "${AppState.baseUrlCover}${book.dStructures}/blankets/${book.blanket}",
                                     fit: BoxFit.cover,
                                   ),
                                 ),

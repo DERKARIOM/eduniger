@@ -13,6 +13,7 @@ import '../dto/book_dto.dart';
 import '../dto/detaille_book_dto.dart';
 import '../models/book_model.dart';
 import '../models/detaille_book_model.dart';
+import '../models/livres_model.dart';
 import '../repositories/book_repository.dart';
 
 class PostmantBookRepositorie implements BookRepository {
@@ -31,43 +32,46 @@ class PostmantBookRepositorie implements BookRepository {
 
 
   @override
-  Future<List<Book>> livres(String numero) async
-  {
+  Future<List<LivresModel>> livres(String numero) async {
     try {
-      // CHANGEMENT ICI : 'POST' au lieu de 'GET'
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$_baseUrl$_livresEndpoint'),
+      // Construction de l'URL avec les paramètres pour une requête GET
+      final uri = Uri.parse('$_baseUrl$_livresEndpoint').replace(
+        queryParameters: {
+          'id_number': numero,
+        },
       );
 
-      request.fields['id_number'] = numero;
-      request.headers['Accept'] = 'application/json';
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
 
-      var streamedResponse = await request.send();
-      var response         = await http.Response.fromStream(streamedResponse);
-      String responseBody  = response.body.trim();
+      String responseBody = response.body.trim();
       debugPrint("Livres body : $responseBody");
 
-      List<Book> livres = [];
+      List<LivresModel> livres = [];
+
       if (response.statusCode == 200 && responseBody.isNotEmpty) {
         final dynamic jsonData = jsonDecode(responseBody);
 
-        // Sécurité supplémentaire : vérifier si le résultat est bien une liste
         if (jsonData is List) {
-          livres = jsonData.map((json) => Book.fromJson(json)).toList();
-        } else {
-          // Si le serveur renvoie {"error": "..."}, jsonData sera un Map, pas une List
-          debugPrint("Erreur serveur : $jsonData");
+          livres = jsonData.map((json) => LivresModel.fromJson(json)).toList();
+        } else if (jsonData is Map && jsonData.containsKey('error')) {
+          debugPrint("Erreur API : ${jsonData['error']}");
         }
+      } else {
+        debugPrint("Erreur HTTP : ${response.statusCode}");
       }
 
-      debugPrint("Livres retour : ${livres.length} livres");
+      print("Livres retour : ${livres.length} livres");
       return livres;
 
     } on SocketException {
       throw Exception('pasDeConnexion');
     } catch (e) {
-      debugPrint("Erreur Exception : $e");
+      debugPrint("Erreur Exception dans livres() : $e");
       rethrow;
     }
   }

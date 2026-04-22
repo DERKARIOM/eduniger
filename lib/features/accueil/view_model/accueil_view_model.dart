@@ -8,18 +8,19 @@ import '../../livres/models/book_model.dart';
 import '../../structures/model/structure_model.dart';
 import '../repositorie/accueil_repositorie.dart';
 
-class AccueilViewModel {
+class AccueilViewModel  extends ChangeNotifier {
   final AccueilRepository repositorie;
   final AppState appState;
-  final String numero;
-  final String version;
+  late String numero;
+  late String version;
 
-  AccueilViewModel({
-    required this.repositorie,
-    required this.appState,
-    required this.numero,
-    required this.version,
-  }) {
+  AccueilViewModel(
+     this.repositorie,
+     this.appState,
+
+  ) {
+    numero=appState.numeroUtilisateur;
+    version=appState.version;
     chargerAccueil();
   }
 
@@ -58,10 +59,11 @@ class AccueilViewModel {
     // Si déjà en cours de chargement, on ne fait rien
     if (_isLoading) return;
 
-    appState.update(() {
+    //appState.update(() {});
+    ChangeNotifier();
       _isLoading    = true;
       _errorMessage = '';
-    });
+
 
     try {
       // Vérification de sécurité sur les paramètres
@@ -94,8 +96,9 @@ class AccueilViewModel {
         _structures = [...adherees, ...recomFiltrees];
         debugPrint('🏛️ Structures fusionnées : ${_structures.length}');
       }
-
-      appState.update(() { _isLoading = false; });
+      _isLoading = false;
+        ChangeNotifier();
+     // appState.update(() { _isLoading = false; });
 
     } catch (e) {
       debugPrint('❌ Erreur dans AccueilViewModel: $e');
@@ -108,7 +111,9 @@ class AccueilViewModel {
 
   // ── Refresh (vide les structures pour forcer la re-fusion) ────────────
   Future<void> rafraichir() async {
-    appState.update(() { _structures = []; });
+    //appState.update(() { _structures = []; });
+    _structures = [];
+    ChangeNotifier();
     await chargerAccueil();
   }
 

@@ -1,4 +1,5 @@
 import 'package:eduniger/features/livres/dto/book_dto.dart';
+import 'package:eduniger/features/utilisateurs/view_models/user_view_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,7 +19,7 @@ class AccueilView extends StatefulWidget {
 }
 
 class _AccueilPageState extends State<AccueilView> {
-  AppState get appState => context.read<AppState>();
+  AppState get appState => context.watch<AppState>();
 
   final PageController _pageController = PageController();
   int _currentPage = 0;
@@ -27,7 +28,7 @@ class _AccueilPageState extends State<AccueilView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AccueilViewModel>().chargerAccueil();
+      context.watch<AccueilViewModel>().chargerAccueil();
     });
     _startAutoScroll();
   }
@@ -59,7 +60,7 @@ class _AccueilPageState extends State<AccueilView> {
       while (mounted) {
         await Future.delayed(const Duration(seconds: 4));
         if (!mounted || !_pageController.hasClients) return;
-        final vm = context.read<AppState>().accueilVM;
+        final vm = context.read<AccueilViewModel>();
         _currentPage = (_currentPage + 1) % vm.publications.length;
         _pageController.animateToPage(
           _currentPage,
@@ -104,9 +105,9 @@ class _AccueilPageState extends State<AccueilView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppState>(
-      builder: (context, appState, _) {
-        final AccueilViewModel vm = appState.accueilVM;
+    return Consumer<AccueilViewModel>(
+      builder: (context, vm,_) {
+        //final AccueilViewModel vm = appState.accueilVM;
         _handleActionMessage(vm);
 
         return Scaffold(
@@ -453,7 +454,7 @@ class _AccueilPageState extends State<AccueilView> {
                   // ← book.blanket exactement comme dans l'ancien code
                   child: Image.network(
                     //'$_baseUrlCover${book.blanket ?? ''}',
-                    "${appState.baseUrlCover}${book.idStruct}/blankets/${book.blanket}",
+                    "${AppState.baseUrlCover}${book.dStructures}/blankets/${book.blanket}",
                     //"$_baseUrlCover${book.idStruct}/blankets/${book.blanket}",
                     fit: BoxFit.cover,
                     width: 100, height: 150,
@@ -514,7 +515,7 @@ class _AccueilPageState extends State<AccueilView> {
               (s.logo != null && s.logo!.isNotEmpty)
                   ? NetworkImage(
                   //"$_baseUrlCover${s.id}/logos/${s.logo}"
-                    "${appState.baseUrlCover}${s.id}/logos/${s.logo}"
+                    "${AppState.baseUrlCover}${s.id}/logos/${s.logo}"
                     )
                   : null,
               onBackgroundImageError: (e, _) =>
@@ -620,11 +621,10 @@ class _AccueilPageState extends State<AccueilView> {
                   CircleAvatar(
                     radius: 30,
                     backgroundColor: Colors.grey[200],
-                    backgroundImage: (a.profile != null &&
-                        a.profile!.isNotEmpty)
+                    backgroundImage: (a.profile.isNotEmpty)
                         ? NetworkImage(
                         //'$_baseUrlProfile${a.profile}'
-                            "${appState.baseUrlProfile}${a.profile}"
+                            "${AppState.baseUrlProfile}${a.profile}"
                           )
                         : null,
                     onBackgroundImageError: (e, _) =>

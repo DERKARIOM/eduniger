@@ -137,14 +137,16 @@ class UserViewModel extends ChangeNotifier {
       await _saveUserLocally(user,_firebaseToken ,numero);
       _currentUser  = user;
       _loginSuccess = true;
-      appState.initialiserAccueilVM(user.numero, _appVersion);
+      //appState.initialiserAccueilVM(user.numero, _appVersion);
+      appState.onConnexionReussie(user.numero, _appVersion);
       appState.update((){});
     } catch (e) {
       _errorMessage = _mapError(e.toString());
       appState.update((){});
     } finally {
       _stopLoading();
-      appState.update((){});
+      notifyListeners();
+     // appState.update((){});
     }
   }
 
