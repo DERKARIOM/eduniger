@@ -106,6 +106,9 @@ class AccueilViewModel  extends ChangeNotifier {
         _isLoading    = false;
         _errorMessage = _mapError(e.toString());
       });
+    }finally{
+      _isLoading = false;
+      ChangeNotifier();
     }
   }
 

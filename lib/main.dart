@@ -16,6 +16,8 @@ import 'features/livres/repositories/postmant_book_repositorie.dart';
 import 'features/livres/view_models/book_view_model.dart';
 import 'features/notification/service/notification_service.dart';
 import 'features/notification/view_model/notification_view_model.dart';
+import 'features/structures/repositories/postmant_structure_repositorie.dart';
+import 'features/structures/view_model/structure_view_model.dart';
 import 'features/utilisateurs/repositories/user_repositorie.dart';
 import 'features/utilisateurs/repositories/postmant_user_repositore.dart';
 import 'features/utilisateurs/view_models/user_view_model.dart';
@@ -116,7 +118,7 @@ void main() async {
                 AccueilViewModel(PostmantAccueilRepository(), appState);
           },
         ),
-
+          //les categorie
         ChangeNotifierProxyProvider<AppState, CategorieViewModel>(
           // create : valeur initiale (avant le premier update)
           create: (_) => CategorieViewModel(
@@ -135,6 +137,27 @@ void main() async {
             }
             return previous ??
                 CategorieViewModel(PostmantCategorieRepositorie(), appState);
+          },
+        ),
+          //les sructures
+        ChangeNotifierProxyProvider<AppState, StructureViewModel>(
+          // create : valeur initiale (avant le premier update)
+          create: (_) => StructureViewModel(
+            PostmantStructureRepositorie(),
+            appState,
+          ),
+          // update : recréé quand AppState change (ex: après login)
+          update: (_, appState, previous) {
+            // Si le numéro a changé (après login), on recrée le VM
+            if (previous?.numero != appState.numeroUtilisateur &&
+                appState.estConnecter) {
+              return StructureViewModel(
+                PostmantStructureRepositorie(),
+                appState,
+              );
+            }
+            return previous ??
+                StructureViewModel(PostmantStructureRepositorie(), appState);
           },
         ),
 

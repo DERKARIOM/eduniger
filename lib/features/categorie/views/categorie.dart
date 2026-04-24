@@ -124,51 +124,53 @@ class _CategorieState extends State<Categorie> {
       errorColor   = Colors.grey;
     }
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(errorIcon, size: 80, color: errorColor)
-                .animate(onPlay: (c) => c.repeat())
-                .shake(duration: 500.ms, hz: 2),
-            const SizedBox(height: 24),
-            Text(errorTitle,
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: errorColor),
-                textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            Text(errorMessage,
-                style: const TextStyle(fontSize: 16, color: Colors.black54),
-                textAlign: TextAlign.center),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  // ← délégué au ViewModel
-                  onPressed: vm.chargerCategorie,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Réessayer'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30)),
-                  ),
-                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3, end: 0),
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(
-                      context, '/bibliotheque'),
-                  child: const Text('Bibliothèque locale',
-                      style: TextStyle(color: Colors.grey)),
-                ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3, end: 0),
-              ],
-            ),
-          ],
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(errorIcon, size: 80, color: errorColor)
+                  .animate(onPlay: (c) => c.repeat())
+                  .shake(duration: 500.ms, hz: 2),
+              const SizedBox(height: 24),
+              Text(errorTitle,
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: errorColor),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 12),
+              Text(errorMessage,
+                  style: const TextStyle(fontSize: 16, color: Colors.black54),
+                  textAlign: TextAlign.center),
+              const SizedBox(height: 32),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    // ← délégué au ViewModel
+                    onPressed: vm.chargerCategorie,
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Réessayer'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                    ),
+                  ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3, end: 0),
+                  TextButton(
+                    onPressed: () => Navigator.pushNamed(
+                        context, '/bibliotheque'),
+                    child: const Text('Bibliothèque locale',
+                        style: TextStyle(color: Colors.grey)),
+                  ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.3, end: 0),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

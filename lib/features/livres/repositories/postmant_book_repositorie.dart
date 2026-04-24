@@ -110,10 +110,45 @@ class PostmantBookRepositorie implements BookRepository {
   }
 
   @override
-  Future<DetailleBookModel> detail(String numero, String id_book) {
-    // TODO: implement detail
-    throw UnimplementedError();
-  }
+  Future<BookDetailDto> detail(String numero, String id_book) async{
+    try {
+      // Construction de l'URL avec les paramètres pour une requête GET
+      final uri = Uri.parse('$_baseUrl$_detailEndpoint').replace(
+        queryParameters: {
+          'id_number': numero,
+          'id_book': id_book,
+        },
+      );
+
+      final response = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
+
+      String responseBody = response.body.trim();
+      debugPrint("Detail body : $responseBody");
+      BookDetailDto detail_livre = BookDetailDto();
+      if (response.statusCode == 200 && responseBody.isNotEmpty) {
+        final dynamic jsonData = jsonDecode(responseBody);
+        //print("categorie  retour : ${categorie.length} categorie");
+        if (jsonData is Map) {
+          detail_livre = BookDetailDto.fromJson(jsonData);
+        } else if (jsonData is List && jsonData.isNotEmpty) {
+          detail_livre = BookDetailDto.fromJson(jsonData[0]);
+        }
+      }
+      print(" detail du livre retourner : ${detail_livre}");
+      return detail_livre;
+
+    } on SocketException {
+      throw Exception('pasDeConnexion');
+    } catch (e) {
+      debugPrint("Erreur Exception dans detail : $e");
+      rethrow;
+    }
+     }
 
   @override
   Future<String> dislike(String numero, String id_book) {

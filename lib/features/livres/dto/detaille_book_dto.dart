@@ -53,36 +53,54 @@ class BookDetailDto {
     this.nbrPage,
   });
 
-  factory BookDetailDto.fromJson(Map<String, dynamic> json) {
+  factory BookDetailDto.fromJson(Map<dynamic, dynamic> json) {
+    // Fonction utilitaire locale pour convertir les données de l'API (0/1 ou "0"/"1") en booléen
+    bool? toBool(dynamic value) {
+      if (value == null) return null;
+      return value == 1 || value == "1" || value == true || value == "true";
+    }
+
+    // Fonction utilitaire pour forcer la conversion en int (au cas où l'API renvoie du texte)
+    int? toInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      return int.tryParse(value.toString());
+    }
+
     return BookDetailDto(
-      idBook: json['idBook'] ?? json['0'] ?? '',
-      bookBlanket: json['bookBlanket'] ?? json['1'] ?? '',
-      bookTitle: json['bookTitle'] ?? json['2'] ?? '',
-      authorName: json['authorName'] ?? json['3'] ?? '',
-      description: json['description'] ?? json['4'] ?? '',
-      categoryTitle: json['categoryTitle'] ?? json['5'] ?? '',
-      isPhysic: json['isPhysic'] ?? json['6'] ,
-      electronic: json['electronic'] ?? json['7'],
-      isAudio: json['isAudio'] ?? json['8'],
-      numberLike: json['numberLike'] ?? json['9'],
-      numberNoLike: json['numberNoLike'] ?? json['10'],
-      numberSubscribe: json['numberSubscribe'] ?? json['11'],
-      numberView: json['numberView'] ?? json['12'],
-      categoryBlanket: json['categoryBlanket'] ?? json['13'] ?? '',
-      idAuthor: json['idAuthor'] ?? json['14'],
-      name: json['name'] ?? json['15'] ?? '',
-      firstName: json['firstName'] ?? json['16'] ?? '',
-      profile: json['profile'] ?? json['17'] ?? '',
-      available: json['available'] ?? json['18'],
-      profession: json['profession'] ?? json['19'] ?? '',
-      call: json['call'] ?? json['20'] ?? '',
-      email: json['email'] ?? json['21'] ?? '',
-      whatsapp: json['whatsapp'] ?? json['22'] ?? '',
+      idBook: json['idBook']?.toString() ?? json['0']?.toString(),
+      bookBlanket: json['bookBlanket']?.toString() ?? json['1']?.toString(),
+      bookTitle: json['bookTitle']?.toString() ?? json['2']?.toString(),
+      authorName: json['authorName']?.toString() ?? json['3']?.toString(),
+      description: json['description']?.toString() ?? json['4']?.toString(),
+      categoryTitle: json['categoryTitle']?.toString() ?? json['5']?.toString(),
+
+      // Correction des types booléens
+      isPhysic: toBool(json['isPhysic'] ?? json['6']),
+      electronic: toBool(json['electronic'] ?? json['7']),
+      isAudio: toBool(json['isAudio'] ?? json['8']),
+
+      // Sécurisation des types entiers
+      numberLike: toInt(json['numberLike'] ?? json['9']),
+      numberNoLike: toInt(json['numberNoLike'] ?? json['10']),
+      numberSubscribe: toInt(json['numberSubscribe'] ?? json['11']),
+      numberView: toInt(json['numberView'] ?? json['12']),
+
+      categoryBlanket: json['categoryBlanket']?.toString() ?? json['13']?.toString(),
+      idAuthor: toInt(json['idAuthor'] ?? json['14']),
+      name: json['name']?.toString() ?? json['15']?.toString(),
+      firstName: json['firstName']?.toString() ?? json['16']?.toString(),
+      profile: json['profile']?.toString() ?? json['17']?.toString(),
+      available: toInt(json['available'] ?? json['18']),
+      profession: json['profession']?.toString() ?? json['19']?.toString(),
+      call: json['call']?.toString() ?? json['20']?.toString(),
+      email: json['email']?.toString() ?? json['21']?.toString(),
+      whatsapp: json['whatsapp']?.toString() ?? json['22']?.toString(),
+
       size: json['size'] ?? json['23'],
       nbrPage: json['nbrPage'] ?? json['24'],
     );
   }
-
 
   Map<String, dynamic> toJson() {
     return {

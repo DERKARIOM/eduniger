@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import '../../../localDataBase/sqlflitEduniger.dart';
+import '../dto/detaille_book_dto.dart';
 import '../models/book_model.dart';
 import '../models/detaille_book_model.dart';
 import '../models/livres_model.dart';
@@ -35,7 +36,7 @@ class BookViewModel extends ChangeNotifier {
   List<Book> _livresEmpruntes   = [];
   List<DetailleBookModel> _livresLocaux      = [];   // ← stockés en local SQLite
 
-  DetailleBookModel? _detailLivre;
+  BookDetailDto? _detailLivre;
   String  _errorMessage        = '';
   bool    _isLoading           = false;
   bool    _isLoadingDetail     = false;
@@ -44,6 +45,7 @@ class BookViewModel extends ChangeNotifier {
   String  _actionMessage       = '';   // retour des actions like/vue/etc.
 
   // ── Getters ────────────────────────────────────────────────────────
+  BookDetailDto? get livreDetail       => _detailLivre;
   List<LivresModel>    get livres            => _livres;
   List<Book>    get livresRecomandes  => _livresRecomandes;
   List<Book>    get livresElectro     => _livresElectro;
@@ -51,7 +53,7 @@ class BookViewModel extends ChangeNotifier {
   List<DetailleBookModel>    get livresTelecharges => _livresTelecharges;
   List<Book>    get livresEmpruntes   => _livresEmpruntes;
   List<DetailleBookModel>    get livresLocaux      => _livresLocaux;
-  DetailleBookModel? get detailLivre       => _detailLivre;
+  BookDetailDto? get detailLivre       => _detailLivre;
   String             get errorMessage      => _errorMessage;
   bool               get isLoading         => _isLoading;
   bool               get isLoadingDetail   => _isLoadingDetail;
@@ -130,12 +132,12 @@ class BookViewModel extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
   // DÉTAIL D'UN LIVRE
   // ══════════════════════════════════════════════════════════════════════
-  Future<void> chargerDetail(String idBook) async {
+  Future<void> chargerDetail(String numero,String idBook,) async {
     _isLoadingDetail = true;
     _errorMessage    = '';
     notifyListeners();
     try {
-      _detailLivre = await repositorie.detail(numero, idBook);
+      _detailLivre = await repositorie.detail( numero ,idBook);
       // On enregistre automatiquement la vue
       await enregistrerVue(idBook);
     } catch (e) {

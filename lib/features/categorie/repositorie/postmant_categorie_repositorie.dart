@@ -44,7 +44,7 @@ class PostmantCategorieRepositorie extends CategorieRepositorie {
         debugPrint("Erreur HTTP : ${response.statusCode}");
       }
 
-      print("categorie  retour : ${categorie.length} categorie");
+      //print("categorie  retour : ${categorie.length} categorie");
       return categorie;
 
     } on SocketException {
