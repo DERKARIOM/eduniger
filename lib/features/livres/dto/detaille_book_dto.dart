@@ -13,6 +13,7 @@ class BookDetailDto {
   final int? numberSubscribe;
   final int? numberView;
   final String? categoryBlanket;
+  final String? idStructure;
   final int? idAuthor;
   final String? name;
   final String? firstName;
@@ -40,6 +41,7 @@ class BookDetailDto {
     this.numberSubscribe,
     this.numberView,
     this.categoryBlanket,
+    this.idStructure,
     this.idAuthor,
     this.name,
     this.firstName,
@@ -99,6 +101,7 @@ class BookDetailDto {
 
       size: json['size'] ?? json['23'],
       nbrPage: json['nbrPage'] ?? json['24'],
+      idStructure: json ['idStructures'] ?? json['25']?.toString(),
     );
   }
 
