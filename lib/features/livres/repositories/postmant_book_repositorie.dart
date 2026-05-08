@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:eduniger/features/livres/models/book_model.dart';
 import 'package:eduniger/features/livres/models/detaille_book_model.dart';
 import 'package:eduniger/features/livres/repositories/book_repository.dart';
@@ -98,9 +99,30 @@ class PostmantBookRepositorie implements BookRepository {
   }
 
   @override
-  Future<String> abonner(String numero, String id_book) {
-    // TODO: implement abonner
-    throw UnimplementedError();
+  Future<String> abonner(String numero, String id_book)async {
+    String res='';
+    String url = '$_baseUrl$_abonnerEndpoint';
+    final dio = Dio();
+    dio.options.headers['Accept'] = 'application/json';
+    Response response = await  dio.postUri(
+      Uri.parse(url),
+      data: {
+        'idNumber': numero,
+        'idBook': id_book,
+      },
+    );
+    String responseBody = response.data.toString();
+    debugPrint("Like body : $responseBody");
+    if (response.statusCode == 200 && responseBody.isNotEmpty) {
+      jsonDecode(responseBody);
+      if (responseBody == 'true') {
+        return 'ok';
+      }else{
+        return 'erreurServeur';
+      }
+    }
+    return res;
+
   }
 
   @override
@@ -151,135 +173,131 @@ class PostmantBookRepositorie implements BookRepository {
      }
 
   @override
-  Future<String> dislike(String numero, String id_book) {
+  Future<String> dislike(String numero, String id_book) async {
     // TODO: implement dislike
-    throw UnimplementedError();
+    String res='';
+    String url = '$_baseUrl$_dislikeEndpoint';
+    final dio = Dio();
+    dio.options.headers['Accept'] = 'application/json';
+    Response response = await  dio.postUri(
+      Uri.parse(url),
+      data: {
+        'idNumber': numero,
+        'idBook': id_book,
+      },
+    );
+    String responseBody = response.data.toString();
+    debugPrint("Like body : $responseBody");
+    if (response.statusCode == 200 && responseBody.isNotEmpty) {
+      jsonDecode(responseBody);
+      if (responseBody == 'true') {
+        return 'ok';
+      }else{
+        return 'erreurServeur';
+      }
+    }
+    return res;
   }
 
-  @override
-  Future<String> like(String numero, String id_book) {
-    // TODO: implement like
-    throw UnimplementedError();
-  }
 
   @override
-  Future<String> vue(String numero, String id_book) {
+  Future<String> vue(String numero, String id_book) async {
     // TODO: implement vue
-    throw UnimplementedError();
+    String res='';
+    try {
+      final uri = Uri.parse('$_baseUrl$_vueEndpoint');
+      final response = await http.post(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+        body: {
+          'idNumber': numero,
+          'idBook': id_book,
+        },
+      );
+      String responseBody = response.body.trim();
+      if (response.statusCode == 200 && responseBody.isNotEmpty) {
+        final dynamic jsonData = jsonDecode(responseBody);
+        if (jsonData == '1') {
+          res='ok';
+          debugPrint("vue : $res");
+        }
+        else {
+          return 'erreurServeur';
+        }
+      }
+      return res;
+    }catch (e) {
+      rethrow;
+    }
+
   }
 
-
-    /*
+// Dans PostmantBookRepositorie
   @override
-  Future<DetailleBookModel> detail(String numero, String idBook) async
-  {
+  Future<String> reserverLivre(String numero, String idBook) async {
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$_baseUrl$_detailEndpoint'),
+      final uri = Uri.parse('$_baseUrl$_detailEndpoint').replace(
+        queryParameters: {
+          'id_number': numero,
+          'id_book': idBook,
+        },
       );
 
-      request.fields['id_number'] = numero;
-      request.fields['id_book'] = idBook;
-      request.headers['Accept'] = 'application/json';
-
-      var streamedResponse = await request.send();
-      var response         = await http.Response.fromStream(streamedResponse);
-      String responseBody  = response.body.trim();
-      BookDetailDto bookDto;
-      List<DetailleBookModel> livre = [];
-      bookDto = BookDetailDto.fromJson(jsonDecode(responseBody));
-      livre.add(DetailleBookModel(
-        id: bookDto.idBook ?? '',
-        couverture: bookDto.bookBlanket ??'',
-        titre: bookDto.bookTitle ??'',
-        description:bookDto.description ??'',
-        titre_categorie: bookDto.categoryTitle ??'',
-        est_pysique: bookDto.isPhysic ?? false,
-        est_electronique: bookDto.electronic ?? false,
-        est_audio: bookDto.isAudio ?? false,
-
-      ));
-      return livre;
+      final res = await http.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+        },
+      );
 
 
+      final body = res.body.trim();
+      debugPrint("reserverLivre [${res.statusCode}] : $body");
 
+      if (body.toLowerCase() == 'ok' || res.statusCode == 200) return 'success';
+      if (body.contains('already'))   return 'deja_reserve';
+      if (body.contains('not_found')) return 'introuvable';
 
-    } on SocketException {
-      throw Exception('pasDeConnexion');
-    } catch (e) { rethrow; }
-  }
-
-
-  Future<String> _actionSimple(
-      String endpoint, Map<String, String> fields, String actionName,
-      )
-  async {
-    try {
-      final response = await _post(endpoint, fields);
-      final body     = response.body.trim();
-      debugPrint("$actionName [body] : $body");
-
-      if (body.toLowerCase() == 'ok' || response.statusCode == 200) {
-        return 'success';
-      }
-      // Tentative JSON
       try {
-        final json   = jsonDecode(body) as Map<String, dynamic>;
-        final status = json['status']?.toString() ?? '';
+        final json    = jsonDecode(body) as Map<String, dynamic>;
+        final status  = json['status']?.toString() ?? '';
         if (status == 'success') return 'success';
         return json['message']?.toString() ?? 'erreurServeur';
       } catch (_) {}
 
       return 'erreurServeur';
-    } on SocketException {
-      throw Exception('pasDeConnexion');
-    } catch (e) { rethrow; }
-  }
-
-  @override
-  Future<String> vue(String numero, String id_book) async {
-    return _actionSimple(
-      _vueEndpoint,
-      {'id_number': numero, 'id_book': id_book},
-      'vue',
-    );
+    } on SocketException { throw Exception('pasDeConnexion'); }
+    catch (e) { rethrow; }
   }
 
   @override
   Future<String> like(String numero, String id_book) async {
-    return _actionSimple(
-      _likeEndpoint,
-      {'id_number': numero, 'id_book': id_book},
-      'like',
+    // TODO: implement like
+    String res='';
+    String url = '$_baseUrl$_likeEndpoint';
+    final dio = Dio();
+    dio.options.headers['Accept'] = 'application/json';
+    Response response = await  dio.postUri(
+        Uri.parse(url),
+        data: {
+          'idNumber': numero,
+          'idBook': id_book,
+        },
     );
+    String responseBody = response.data.toString();
+    debugPrint("Like body : $responseBody");
+    if (response.statusCode == 200 && responseBody.isNotEmpty) {
+      jsonDecode(responseBody);
+      if (responseBody == 'true') {
+        return 'ok';
+      }else{
+        return 'erreurServeur';
+      }
+    }
+    return res;
   }
 
-  @override
-  Future<String> dislike(String numero, String id_book) async {
-    return _actionSimple(
-      _dislikeEndpoint,
-      {'id_number': numero, 'id_book': id_book},
-      'dislike',
-    );
-  }
 
-  @override
-  Future<String> abonner(String numero, String id_book) async {
-    return _actionSimple(
-      _abonnerEndpoint,
-      {'id_number': numero, 'id_book': id_book},
-      'abonner',
-    );
-  }
-
-  @override
-  Future<String> comment(String numero, String id_book, String comment) async {
-    return _actionSimple(
-      _commentEndpoint,
-      {'id_number': numero, 'id_book': id_book, 'comment': comment},
-      'comment',
-    );
-  }
-  */
 }

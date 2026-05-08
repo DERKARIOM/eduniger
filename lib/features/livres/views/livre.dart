@@ -146,7 +146,7 @@ class _LivreState extends State<Livre> {
                                     color: Colors.green, size: 15,)
                                       : SizedBox(),
                                   const SizedBox(width: 8),
-                                  book.electronic == true
+                                  book.electronic !='null'
                                       ? Icon(Icons.picture_as_pdf,
                                     color: Colors.green, size: 15,)
                                       : SizedBox(),

@@ -45,6 +45,7 @@ class AccueilViewModel  extends ChangeNotifier {
 
   // ── Getters ────────────────────────────────────────────────────────────
   List<Book>      get livresRecomandes => _livresRecomandes;
+
   List<Structure> get structures       => _structures;
   List<Author>    get auteurs          => _auteurs;
   bool            get isLoading        => _isLoading;
@@ -55,12 +56,14 @@ class AccueilViewModel  extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
   // CHARGEMENT PRINCIPAL
   // ══════════════════════════════════════════════════════════════════════
+  /*
   Future<void> chargerAccueil() async {
     // Si déjà en cours de chargement, on ne fait rien
     if (_isLoading) return;
 
     //appState.update(() {});
-    ChangeNotifier();
+
+    notifyListeners();
       _isLoading    = true;
       _errorMessage = '';
 
@@ -97,26 +100,76 @@ class AccueilViewModel  extends ChangeNotifier {
         debugPrint('🏛️ Structures fusionnées : ${_structures.length}');
       }
       _isLoading = false;
-        ChangeNotifier();
-     // appState.update(() { _isLoading = false; });
+      notifyListeners();
+      //appState.update(() { _isLoading = false; });
 
     } catch (e) {
       debugPrint('❌ Erreur dans AccueilViewModel: $e');
       appState.update(() {
         _isLoading    = false;
         _errorMessage = _mapError(e.toString());
+        notifyListeners();
       });
     }finally{
       _isLoading = false;
-      ChangeNotifier();
+      notifyListeners();
+     // appState.update(() { _isLoading = false; });
     }
   }
+*/
+  Future<void> chargerAccueil() async {
+    if (_isLoading) return;
 
+    _isLoading = true;
+    _errorMessage = '';
+    notifyListeners(); // Informe l'UI que le chargement commence
+
+    try {
+      if (numero.isEmpty) {
+        throw Exception("Erreur : Identifiant utilisateur manquant.");
+      }
+
+      final AccueilData data = await repositorie.chargerAccueil(numero, version);
+
+      _livresRecomandes = data.livresRecomandes;
+      _auteurs = data.auteurs;
+
+      if (_structures.isEmpty) {
+        final adherees = data.structuresAdherees
+            .map((s) => s.copyWith(isAdhere: true))
+            .toList();
+
+        final idsAdheres = adherees.map((s) => s.id).toSet();
+
+        final recomFiltrees = data.structuresRecomandees
+            .where((s) => !idsAdheres.contains(s.id))
+            .map((s) => s.copyWith(isAdhere: false))
+            .toList();
+
+        _structures = [...adherees, ...recomFiltrees];
+        debugPrint('🏛️ Structures fusionnées : ${_structures.length}');
+      }
+
+      _isLoading = false;
+      _errorMessage = '';
+    } catch (e) {
+      debugPrint('❌ Erreur dans AccueilViewModel: $e');
+      _isLoading = false;
+      _errorMessage = _mapError(e.toString());
+    } finally {
+      _isLoading = false;
+      // Très important : notifier l'interface de la fin du chargement
+      notifyListeners();
+
+      // Si appState est utilisé pour l'UI globale
+      appState.update(() {});
+    }
+  }
   // ── Refresh (vide les structures pour forcer la re-fusion) ────────────
   Future<void> rafraichir() async {
     //appState.update(() { _structures = []; });
     _structures = [];
-    ChangeNotifier();
+    notifyListeners();
     await chargerAccueil();
   }
 

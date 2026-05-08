@@ -73,25 +73,25 @@ class UserViewModel extends ChangeNotifier {
   void togglePasswordVisibility() {
     _isPasswordVisible = !_isPasswordVisible;
     appState.update((){});
-    //notifyListeners();
+    notifyListeners();
   }
 
   void setCountryCode(String code) {
     _countryCode = code;
     appState.update((){});
-    //notifyListeners();
+    notifyListeners();
   }
 
   void selectProfession(String profession) {
     _selectedProfession = profession;
     appState.update((){});
-    //notifyListeners();
+    notifyListeners();
   }
 
   void clearError() {
     _errorMessage = '';
     appState.update((){});
-    //notifyListeners();
+    notifyListeners();
   }
 
   // ── Reset flags (appelés après navigation) ────────────────────────────
@@ -250,12 +250,15 @@ class UserViewModel extends ChangeNotifier {
       // ← résultat traité séparément pour changePassword
       _handleChangePasswordResult(result);
       appState.update((){});
+      notifyListeners();
     } catch (e) {
       _errorMessage = _mapError(e.toString());
       appState.update((){});
+      notifyListeners();
     } finally {
       _stopLoading();
      // appState.update((){});
+      notifyListeners();
     }
   }
 
@@ -326,19 +329,19 @@ class UserViewModel extends ChangeNotifier {
     _isLoading    = true;
     _errorMessage = '';
     appState.update((){});
-    //notifyListeners();
+    notifyListeners();
   }
 
   void _stopLoading() {
     _isLoading = false;
     appState.update((){});
-    //notifyListeners();
+    notifyListeners();
   }
 
   void _setError(String message) {
     _errorMessage = message;
     appState.update((){});
-    //notifyListeners();
+    notifyListeners();
   }
 
   String _hashPassword(String password) {

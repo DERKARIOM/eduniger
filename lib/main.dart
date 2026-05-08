@@ -12,6 +12,8 @@ import 'appstate.dart';
 import 'features/accueil/repositorie/pastmant_acceuil_repositorie.dart';
 import 'features/accueil/view_model/accueil_view_model.dart';
 import 'features/categorie/view_model/categorie_view_model.dart';
+import 'features/lecteur_audio/view_model/lecteur_audio_view_model.dart';
+import 'features/lecteur_pdf/view_model/lecteur_pdf_view_model.dart';
 import 'features/livres/repositories/postmant_book_repositorie.dart';
 import 'features/livres/view_models/book_view_model.dart';
 import 'features/notification/service/notification_service.dart';
@@ -95,9 +97,6 @@ void main() async {
           create: (_) => NotificationViewModel(appState),
         ),
 
-        // ── 4. AccueilViewModel : chargé seulement si connecté ─────────
-        // Utilise lazy: true (défaut) → créé au premier accès
-
         ChangeNotifierProxyProvider<AppState, AccueilViewModel>(
           // create : valeur initiale (avant le premier update)
           create: (_) => AccueilViewModel(
@@ -179,6 +178,14 @@ void main() async {
                 BookViewModel(PostmantBookRepositorie(), appState);
           },
         ),
+        // Dans MultiProvider — ajouter :
+        ChangeNotifierProvider<LecteurAudioViewModel>(
+          create: (_) => LecteurAudioViewModel(),
+        ),
+        ChangeNotifierProvider<LecteurPdfViewModel>(
+          create: (_) => LecteurPdfViewModel(),
+        ),
+
       ],
       child: EduNigerApp(savedThemeMode: savedThemeMode),
     )

@@ -1,4 +1,5 @@
 //import androidx.compose.foundation.text2.input.delete
+import org.gradle.api.tasks.compile.JavaCompile
 buildscript {
     repositories {
         google()
@@ -34,3 +35,12 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+
+        subprojects {
+            tasks.withType<JavaCompile>().configureEach {
+                options.compilerArgs.add("-Xlint:-options")
+                sourceCompatibility = JavaVersion.VERSION_17.toString()
+                targetCompatibility = JavaVersion.VERSION_17.toString()
+            }
+        }

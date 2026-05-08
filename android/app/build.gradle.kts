@@ -41,14 +41,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    defaultConfig {
-        applicationId = "com.ninotech.eduniger"
-        minSdk = flutter.minSdkVersion // Recommandé pour les notifications
-        // ...
-
-        // 1. Activer le support multidex si nécessaire
-        multiDexEnabled = true
-    }
 
 
 }
@@ -61,4 +53,14 @@ dependencies {
 
 flutter {
     source = "../.."
+
+    /* defaultConfig {
+        applicationId = "com.ninotech.eduniger"
+        minSdk = flutter.minSdkVersion // Recommandé pour les notifications
+        // ...
+
+        // 1. Activer le support multidex si nécessaire
+        multiDexEnabled = true
+    } */
+
 }

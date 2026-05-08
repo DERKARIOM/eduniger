@@ -6,7 +6,7 @@ class BookDetailDto {
   final String? description;
   final String? categoryTitle;
   final bool? isPhysic;
-  final bool? electronic;
+  final String? electronic;
   final bool? isAudio;
   final int? numberLike;
   final int? numberNoLike;
@@ -64,9 +64,9 @@ class BookDetailDto {
 
     // Fonction utilitaire pour forcer la conversion en int (au cas où l'API renvoie du texte)
     int? toInt(dynamic value) {
-      if (value == null) return null;
+      if (value == null) return 0;
       if (value is int) return value;
-      return int.tryParse(value.toString());
+      return int.tryParse(value.toString()) ?? 0;
     }
 
     return BookDetailDto(
@@ -79,7 +79,7 @@ class BookDetailDto {
 
       // Correction des types booléens
       isPhysic: toBool(json['isPhysic'] ?? json['6']),
-      electronic: toBool(json['electronic'] ?? json['7']),
+      electronic: json['electronic'] ?? json['7']?.toString(),
       isAudio: toBool(json['isAudio'] ?? json['8']),
 
       // Sécurisation des types entiers

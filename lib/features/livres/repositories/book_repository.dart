@@ -16,6 +16,7 @@ abstract class BookRepository {
   Future <String> dislike(String numero,String id_book);
   Future <String> abonner(String numero,String id_book);
   Future <String> comment(String numero,String id_book,String comment);
+  Future<String> reserverLivre(String numero, String idBook);
 
 
 }

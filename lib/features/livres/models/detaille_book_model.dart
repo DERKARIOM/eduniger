@@ -27,6 +27,8 @@ class DetailleBookModel {
    String? _whatsapp;
    dynamic? _taille;
    dynamic? _nombre_page;
+   bool _is_dowlonded_pdf=false;
+   bool _is_dowlonded_audio=false;
    DetailleBookModel({
        String? id,
        String? couverture,
@@ -54,6 +56,8 @@ class DetailleBookModel {
        String? whatsapp,
        dynamic taille,
        dynamic nombre_page,
+       bool? is_dowlonded_pdf,
+       bool? is_dowlonded_audio,
 }): _id=id,
    _couverture=couverture,
     _titre=titre,
@@ -77,7 +81,10 @@ _disponible=disponible,
     _email=email,
     _whatsapp=whatsapp,
     _taille=taille,
-    _nombre_page=nombre_page{
+   _fichier=fichier,
+    _nombre_page=nombre_page,
+    _is_dowlonded_pdf=is_dowlonded_pdf??false,
+    _is_dowlonded_audio=is_dowlonded_audio??false {
 
    }
    void ajouter_jaime(int nombre_jaime) {
@@ -119,6 +126,16 @@ String get email => _email!;
 String get whatsapp => _whatsapp!;
 dynamic get taille => _taille!;
 dynamic get nombre_page => _nombre_page!;
+bool get is_dowlonded_pdf => _is_dowlonded_pdf;
+bool get is_dowlonded_audio => _is_dowlonded_audio;
+
+void set is_dowlonded_pdf(bool value) {
+  _is_dowlonded_pdf = value;
+}
+void set is_dowlonded_audio(bool value) {
+  _is_dowlonded_audio = value;
+}
+
 
 
 }
