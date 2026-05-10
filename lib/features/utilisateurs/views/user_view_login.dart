@@ -8,6 +8,8 @@ import 'package:eduniger/features/utilisateurs/views/user_view_register.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../notification/view_model/notification_view_model.dart';
+
 
 
 class user_view_login extends StatefulWidget {
@@ -209,12 +211,18 @@ class _LoginPageState extends State<user_view_login> {
                           onPressed:
                             vm.isLoading
                                 ? null
-                                : () => vm.login(
+                                : ()  async {vm.login(
                               // verification.se_connecter(_phoneController.text.trim(), _passwordController.text);
                               _phoneController.text.trim(),
                               _passwordController.text,
 
-                            ),
+                            );
+                            if (vm.loginSuccess) {
+                              await context.read<NotificationViewModel>().initialiserApresLogin(_phoneController.text.trim()); // ton numéro utilisateur
+
+                            }
+
+                            },
 
 
                           style: ElevatedButton.styleFrom(

@@ -3,8 +3,10 @@ import 'package:crypto/crypto.dart';
 import 'package:eduniger/appstate.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as context;
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../../localDataBase/sqlflitEduniger.dart';
+import '../../notification/view_model/notification_view_model.dart';
 import '../models/user_model.dart';
 import '../repositories/user_repositorie.dart';
 
@@ -27,6 +29,7 @@ class UserViewModel extends ChangeNotifier {
   String  _firebaseToken     = '';
   String  _appVersion        = '';
   String  _idUser            = '';
+
 
   // ── Flags de navigation (un par action) ───────────────────────────────
   bool _loginSuccess    = false;
@@ -139,6 +142,7 @@ class UserViewModel extends ChangeNotifier {
       _loginSuccess = true;
       //appState.initialiserAccueilVM(user.numero, _appVersion);
       appState.onConnexionReussie(user.numero, _appVersion);
+
       appState.update((){});
     } catch (e) {
       _errorMessage = _mapError(e.toString());

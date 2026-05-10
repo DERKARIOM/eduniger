@@ -2,7 +2,9 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:eduniger/features/accueil/views/acceuil_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../features/notification/view_model/notification_view_model.dart';
 import '../../localDataBase/sqlflitEduniger.dart';
 import 'bibliotheque_page.dart';
 import 'eduna_page.dart';
@@ -92,11 +94,16 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ),
                       ),
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: Colors.white,
-                        child:  Icon(Icons.notifications_none_sharp, size: 30,),
-
+                      // Dans ton widget principal (ex: HomeView)
+                      Consumer<NotificationViewModel>(
+                        builder: (_, vm, __) => IconButton(
+                          icon: Badge(
+                            isLabelVisible: vm.nonLues > 0,
+                            label: Text('${vm.nonLues}'),
+                            child: const Icon(Icons.notifications_none_sharp, size: 30),
+                          ),
+                          onPressed: () => Navigator.of(context).pushNamed('/notification'),
+                        ),
                       ),
                       const SizedBox(width: 5),
                       IconButton(onPressed: (){

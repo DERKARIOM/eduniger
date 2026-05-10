@@ -499,7 +499,9 @@ class _AccueilPageState extends State<AccueilView> {
   Widget _sectionStructures(AccueilViewModel vm) {
 
     return Column(children: [
-      _entete('Structures', onVoirPlus: () {}),
+      _entete('Structures', onVoirPlus: () {
+
+      }),
       vm.structures.isEmpty
           ? _sectionVide('Aucune structure disponible')
           : ListView.builder(
@@ -508,6 +510,7 @@ class _AccueilPageState extends State<AccueilView> {
         itemCount: vm.structures.length.clamp(0, 7),
         itemBuilder: (_, index) {
           final Structure s = vm.structures[index];
+          int index2 = int.tryParse(s.id.toString()) ?? 0;
           return ListTile(
 
             contentPadding: const EdgeInsets.symmetric(
@@ -542,7 +545,7 @@ class _AccueilPageState extends State<AccueilView> {
               child: TextButton(
                 // ← dialog dans la View, action déléguée au ViewModel
                 onPressed: () =>
-                    _confirmerToggleStructure(vm, index),
+                    _confirmerToggleStructure(vm,s),
                 child: Text(
                   s.isAdhere ? 'Détacher' : "S'adhérer",
                   style: const TextStyle(
@@ -561,9 +564,9 @@ class _AccueilPageState extends State<AccueilView> {
   // Dialog de confirmation (responsabilité de la View)
   // Identique à la logique de ton ancien _handleStructureAction
   Future<void> _confirmerToggleStructure(
-      AccueilViewModel vm, int index) async
+      AccueilViewModel vm,Structure s) async
   {
-    final Structure s = vm.structures[index];
+   // final Structure s = vm.structures;
 
     if (s.isAdhere) {
       // ← même dialog que ton ancien code
@@ -579,12 +582,18 @@ class _AccueilPageState extends State<AccueilView> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false),
+              onPressed: () {
+                debugPrint('${s.id}');
+                Navigator.pop(context, false);
+              },
               child: const Text('Annuler',
                   style: TextStyle(fontSize: 12, color: Colors.white)),
             ),
             TextButton(
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () {
+                     debugPrint('${s.id}');
+                     vm.toggleStructure(s);
+                  },
               child: const Text('Confirmer',
                   style: TextStyle(color: Colors.red)),
             ),
@@ -594,10 +603,50 @@ class _AccueilPageState extends State<AccueilView> {
           false;
 
       if (!confirm) return;
+    }else {
+      // ← même dialog que ton ancien code
+      final bool confirm = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          backgroundColor: Colors.black45,
+          title: const Text('Adhésion',
+              style: TextStyle(fontSize: 14, color: Colors.white)),
+          content: Text(
+            'Voulez-vous vraiment vous adhérez à ${s.name} ?',
+            style: const TextStyle(fontSize: 12, color: Colors.white),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                debugPrint('${s.id}');
+                Navigator.pop(context, false);
+              },
+      child: const Text('Annuler',
+      style: TextStyle(fontSize: 12, color: Colors.white)),
+      ),
+      TextButton(
+      onPressed: () {
+      debugPrint('${s.id}');
+      vm.toggleStructure(s);
+      Navigator.pop(context, false);
+
+
+      },
+      child: const Text('Confirmer',
+      style: TextStyle(color: Colors.red)),
+      ),
+      ],
+      ),
+      ) ??
+      false;
+
+      if (!confirm) return;
+      }
+
     }
 
     // ← action déléguée au ViewModel
-    await vm.toggleStructure(index);
+   // await vm.toggleStructure(index);
   }
 
   // ══════════════════════════════════════════════════════════════════════
@@ -684,4 +733,3 @@ class _AccueilPageState extends State<AccueilView> {
       ]),
     );
   }
-}

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:eduniger/features/accueil/repositorie/recomandation_api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
@@ -80,21 +81,77 @@ class PostmantAccueilRepository implements AccueilRepository {
   // ADHÉRER
   // ══════════════════════════════════════════════════════════════════════
   @override
-  Future<String> adherer(String numero, String idStructure) =>
-      _actionSimple(
-        '/insert_subscribe.php',
-        {'id_number': numero, 'id_structure': idStructure},
+  Future<String> adherer (String numero, int idStructure) async {
+    String resul ='';
+    try {
+
+      final dio =Dio();
+      Response response = await dio.post(
+        '$_baseUrl/adherer_struct.php',
+        data: {
+          'id_user': numero,
+          'id_struct': idStructure,
+        },
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+          },
+        ),
       );
+      final responseBody = response.data.toString();
+      debugPrint(responseBody);
+       if (responseBody == "true") {
+         resul='ok';
+        return resul;
+      }else if (responseBody == "ras") {
+         resul='deja';
+        return resul;
+
+      }
+
+
+    } catch (e) {
+      return 'erreurServeur';
+    }
+    return  resul;
+  }
+
 
   // ══════════════════════════════════════════════════════════════════════
   // DÉTACHER
   // ══════════════════════════════════════════════════════════════════════
   @override
-  Future<String> detacher(String numero, String idStructure) =>
-      _actionSimple(
-        '/detach_structure.php',
-        {'id_number': numero, 'id': idStructure},
+  Future<String> detacher(String numero, int idStructure) async {
+    String resul ='';
+
+    try {
+      final dio =Dio();
+      Response response = await dio.post(
+        '$_baseUrl/detach_struct.php',
+        data: {
+          'id_user': numero,
+          'id_struct': idStructure,
+        },
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+          },
+        ),
       );
+      final responseBody = response.data.toString();
+      debugPrint(responseBody);
+       if (responseBody == "true") {
+         resul='ok';
+        return resul;
+      }else if (responseBody == "ras") {
+         resul = 'déja';
+         return resul;
+       }
+    }catch (e) {
+      return 'erreurServeur';
+    }
+    return  resul;
+  }
 
   // ── Action générique ────────────────────────────────────────────────
   Future<String> _actionSimple(

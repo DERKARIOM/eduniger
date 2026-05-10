@@ -4,6 +4,7 @@ import 'package:path/path.dart';
 
 import '../features/livres/models/book_model.dart';
 import '../features/livres/models/detaille_book_model.dart';
+import '../features/notification/model/notification_model.dart';
 import '../features/utilisateurs/models/user_model.dart';
 
 
@@ -33,10 +34,12 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
+    Database? _db;
+
 
     return await openDatabase(
         path,
-        version: 2,
+        version: 3,
         onUpgrade: _onUpgrade,
         onCreate: _createDB);
   }
@@ -48,6 +51,8 @@ class DatabaseHelper {
       await _createDB(db, newVersion);
     }
   }
+  //Future<Database> get db async => _db ??= await _createDB();
+
   Future _createDB(Database db, int version) async {
       await db.execute('''
       CREATE TABLE IF NOT EXISTS users (
@@ -100,8 +105,84 @@ class DatabaseHelper {
     PRIMARY KEY (id_book, numero)
   )
 ''');
+      await db.execute('''
+          CREATE TABLE notifications (
+            db_id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            id            TEXT    NOT NULL,
+            numero_user   TEXT    NOT NULL,
+            titre         TEXT    NOT NULL DEFAULT '',
+            corps         TEXT    NOT NULL DEFAULT '',
+            type          TEXT    NOT NULL DEFAULT '',
+            extra_data    TEXT    NOT NULL DEFAULT '',
+            data_json     TEXT    NOT NULL DEFAULT '{}',
+            date_creation TEXT    NOT NULL,
+            est_lue       INTEGER NOT NULL DEFAULT 0,
+            UNIQUE(id, numero_user)
+          )
+        ''');
+      await db.execute(
+        'CREATE INDEX idx_user ON notifications(numero_user, date_creation DESC)',
+      );
 
   }
+  //notification
+  Future<void> inserer(NotificationModel n) async {
+    final base = await database;
+    await base.insert(
+      'notifications',
+      n.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    // Garder max 100 par utilisateur
+    await base.execute('''
+      DELETE FROM notifications
+      WHERE numero_user = ?
+        AND db_id NOT IN (
+          SELECT db_id FROM notifications
+          WHERE numero_user = ?
+          ORDER BY date_creation DESC LIMIT 100
+        )
+    ''', [n.numeroUser, n.numeroUser]);
+  }
+
+  // ── Lire ─────────────────────────────────────────────────────────────
+  Future<List<NotificationModel>> charger(String numeroUser) async {
+    final maps = await (await database).query(
+      'notifications',
+      where    : 'numero_user = ?',
+      whereArgs: [numeroUser],
+      orderBy  : 'date_creation DESC',
+    );
+    return maps.map(NotificationModel.fromMap).toList();
+  }
+
+  Future<int> compterNonLues(String numeroUser) async {
+    final r = await (await database).rawQuery(
+      'SELECT COUNT(*) AS c FROM notifications WHERE numero_user=? AND est_lue=0',
+      [numeroUser],
+    );
+    return Sqflite.firstIntValue(r) ?? 0;
+  }
+
+  // ── Mettre à jour ────────────────────────────────────────────────────
+  Future<void> marquerLue(String id, String numeroUser) async =>
+      (await database).update('notifications', {'est_lue': 1},
+          where: 'id=? AND numero_user=?', whereArgs: [id, numeroUser]);
+
+  Future<void> toutMarquerLues(String numeroUser) async =>
+      (await database).update('notifications', {'est_lue': 1},
+          where: 'numero_user=?', whereArgs: [numeroUser]);
+
+  // ── Supprimer ────────────────────────────────────────────────────────
+  Future<void> supprimer(String id, String numeroUser) async =>
+      (await database).delete('notifications',
+          where: 'id=? AND numero_user=?', whereArgs: [id, numeroUser]);
+
+  Future<void> toutEffacer(String numeroUser) async =>
+      (await database).delete('notifications',
+          where: 'numero_user=?', whereArgs: [numeroUser]);
+
+  //_____________
 //sauvegarder numero
   Future<void> saveIdNumber(String idNumber) async {
     final db = await instance.database;

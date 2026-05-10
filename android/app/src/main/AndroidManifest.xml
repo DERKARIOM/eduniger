@@ -115,7 +115,7 @@
 <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 <application
-    android:label="eduniger"
+    android:label="Eduniger"
     android:name="${applicationName}"
     android:icon="@mipmap/ic_launcher"
     android:usesCleartextTraffic="true"

@@ -16,6 +16,7 @@ import 'features/lecteur_audio/view_model/lecteur_audio_view_model.dart';
 import 'features/lecteur_pdf/view_model/lecteur_pdf_view_model.dart';
 import 'features/livres/repositories/postmant_book_repositorie.dart';
 import 'features/livres/view_models/book_view_model.dart';
+import 'features/notification/service/navigation_service.dart';
 import 'features/notification/service/notification_service.dart';
 import 'features/notification/view_model/notification_view_model.dart';
 import 'features/structures/repositories/postmant_structure_repositorie.dart';
@@ -58,7 +59,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 2. Initialisation Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    //options: DefaultFirebaseOptions.currentPlatform,
+
+  );
 
   // 3. Enregistrement du handler de background
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -93,9 +97,7 @@ void main() async {
         ),
 
         // ── 3. NotificationViewModel ───────────────────────────────────
-        ChangeNotifierProvider<NotificationViewModel>(
-          create: (_) => NotificationViewModel(appState),
-        ),
+        ChangeNotifierProvider(create: (_) => NotificationViewModel()),
 
         ChangeNotifierProxyProvider<AppState, AccueilViewModel>(
           // create : valeur initiale (avant le premier update)
@@ -203,6 +205,7 @@ class EduNigerApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           home: const DispatcherPage(),
+          navigatorKey: NavigationService.navigatorKey,
           routes: Routeur.route,
           locale: const Locale('fr', 'FR'),
           supportedLocales: const [

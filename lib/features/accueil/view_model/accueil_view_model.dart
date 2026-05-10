@@ -176,16 +176,17 @@ class AccueilViewModel  extends ChangeNotifier {
   // ══════════════════════════════════════════════════════════════════════
   // ACTION : ADHÉRER / DÉTACHER
   // ══════════════════════════════════════════════════════════════════════
+ /*
   Future<void> toggleStructure(int index) async {
     final Structure s = _structures[index];
     appState.update(() { _isActionLoading = true; });
-
+    notifyListeners();
     try {
       final String result = s.isAdhere
           ? await repositorie.detacher(numero, s.id.toString())
           : await repositorie.adherer(numero,  s.id.toString());
 
-      if (result == 'success') {
+      if (result == 'ok') {
         // Mise à jour locale immédiate via copyWith
         // (préserve tous les autres champs de Structure)
         _structures[index] = s.copyWith(isAdhere: !s.isAdhere);
@@ -199,7 +200,47 @@ class AccueilViewModel  extends ChangeNotifier {
       appState.update(() { _isActionLoading = false; });
     }
   }
+*/
+  // ══════════════════════════════════════════════════════════════════════
+  // ACTION : ADHÉRER / DÉTACHER (CORRIGÉ : utilise l'objet, pas l'index)
+  // ══════════════════════════════════════════════════════════════════════
+  Future<void> toggleStructure(Structure s) async {
+    // 1. Vérifier si l'objet existe encore dans notre liste
+    final int index = _structures.indexWhere((element) => element.id == s.id);
+    if (index == -1) {
+      debugPrint("⚠️ Structure non trouvée dans la liste actuelle.");
+      return;
+    }
 
+    _isActionLoading = true;
+    _actionMessage = '';
+    notifyListeners();
+
+    try {
+      final String result = s.isAdhere
+          ? await repositorie.detacher(numero,index)
+          : await repositorie.adherer(numero, index);
+
+      if (result == 'ok') {
+        // 2. Chercher à nouveau l'index car la liste a pu changer pendant l'appel API (async)
+        final int currentIndex = _structures.indexWhere((element) => element.id == s.id);
+
+        if (currentIndex != -1) {
+          _structures[currentIndex] = s.copyWith(isAdhere: !s.isAdhere);
+          _actionMessage = s.isAdhere ? 'detache_ok' : 'adhere_ok';
+        }
+      } else {
+        _actionMessage = result;
+      }
+    } catch (e) {
+      debugPrint("❌ Erreur toggleStructure: $e");
+      _actionMessage = _mapError(e.toString());
+    } finally {
+      _isActionLoading = false;
+      notifyListeners();
+      appState.update(() {});
+    }
+  }
   // ══════════════════════════════════════════════════════════════════════
   // UTILITAIRES
   // ══════════════════════════════════════════════════════════════════════

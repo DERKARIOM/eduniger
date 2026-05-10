@@ -226,35 +226,7 @@ class RecommendationService {
       return ApiResponse.error('Erreur lors de la récupération des auteurs: $e');
     }
   }
-/*
-  // 5. Récupérer tous les livres
-  static Future<ApiResponse<List<Book>>> getAllBooks({
-    required String idNumber,
-  }) async {
-    try {
-      final response = await _get(
-        '/books.php',
-        {'id_number': idNumber},
-      );
 
-      final data = _handleResponse(response);
-
-      List<Book> books = [];
-      if (data is List) {
-        books = data.map((item) => Book.fromJson(item)).toList();
-      } else if (data is Map && data.containsKey('books')) {
-        books = (data['books'] as List)
-            .map((item) => Book.fromJson(item))
-            .toList();
-      }
-
-      return ApiResponse.success(books);
-
-    } catch (e) {
-      return ApiResponse.error('Erreur lors de la récupération des livres: $e');
-    }
-  }
-*/
   // Méthode pour récupérer toutes les recommandations en une fois
   static Future<Map<String, dynamic>> getAllRecommendations({
     required String idNumber,

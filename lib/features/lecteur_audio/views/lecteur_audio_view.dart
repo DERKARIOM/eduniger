@@ -182,9 +182,8 @@ class _LecteurAudioViewState extends State<LecteurAudioView>
           ),
         ],
         image: const DecorationImage(
-          image: AssetImage('assets/images/img_wait_cover_book.png'),
-          fit  : BoxFit.cover,
-        ),
+
+          image: AssetImage('assets/images/img_wait_cover_book.png'), fit  : BoxFit.cover,),
       ),
     );
   }
@@ -237,48 +236,7 @@ class _LecteurAudioViewState extends State<LecteurAudioView>
           ),
         ],
       ),
-      /*
-      Stack(
-          children: [
-        // Buffering (fond gris avec teinte verte légère)
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value          : vm.duree.inSeconds > 0
-                ? (vm.buffered.inSeconds / vm.duree.inSeconds).clamp(0.0, 1.0)
-                : 0.0,
-            backgroundColor: Colors.white12,
-            valueColor     : const AlwaysStoppedAnimation<Color>(
-                Color(0xFF2D5A27)),
-            minHeight: 4,
-          ),
-        ),
-        // Slider de position
 
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight          : 4,
-            thumbShape           : const RoundSliderThumbShape(
-                enabledThumbRadius: 8),
-            overlayShape         : const RoundSliderOverlayShape(
-                overlayRadius: 16),
-            activeTrackColor     : Colors.green,
-            inactiveTrackColor   : Colors.transparent,
-            thumbColor           : Colors.green,
-            overlayColor         : Colors.green.withOpacity(0.2),
-          ),
-          child: Slider(
-            value   : vm.progression,
-            min     : 0.0,
-            max     : 1.0,
-            onChanged: (v) => vm.seekToSlider(v),
-          ),
-        ),
-
-      ]
-      ),
-*/
-      // Temps
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Row(
