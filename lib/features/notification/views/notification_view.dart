@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../model/notification_model.dart';
+import '../service/badje_service.dart';
 import '../view_model/notification_view_model.dart';
 
 class NotificationView extends StatefulWidget {
@@ -16,10 +17,19 @@ class _NotificationViewState extends State<NotificationView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final vm = context.read<NotificationViewModel>();
+      await vm.chargerNotifications();
+
+      // ✅ Effacer le badge quand l'utilisateur consulte ses notifications
+      await BadgeService.instance.effacer();
+    });
     // Charger au premier affichage
+    /*
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<NotificationViewModel>().chargerNotifications();
     });
+    */
   }
 
   @override

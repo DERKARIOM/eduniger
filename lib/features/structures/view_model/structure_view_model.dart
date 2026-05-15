@@ -2,6 +2,7 @@ import 'package:eduniger/features/structures/view_model/structure_view_model.dar
 import 'package:flutter/cupertino.dart';
 
 import '../../../appstate.dart';
+import '../../livres/models/book_model.dart';
 import '../model/structure_model.dart';
 import '../repositories/structure_repositorie.dart';
 
@@ -17,6 +18,9 @@ class StructureViewModel extends ChangeNotifier {
   }
 
   List<Structure> _structures=[];
+  List<Book> _book_structure=[];
+  List<Book> get book_structure => _book_structure;
+
   List<Structure> get structures => _structures;
   String  _errorMessage  = '';
   bool    _isLoading = false;
@@ -34,6 +38,17 @@ class StructureViewModel extends ChangeNotifier {
     _startLoading();
     try {
       _structures = await repositorie.structures(appState.numeroUtilisateur);
+    } catch (e) {
+      _errorMessage = _mapError(e.toString());
+    } finally {
+      _stopLoading();
+    }
+  }
+  Future<void> chargerLivreStructure(int id) async {
+    _startLoading();
+    try {
+      _book_structure = await repositorie.livre_structure(appState.numeroUtilisateur,id);
+      debugPrint(_book_structure.toString());
     } catch (e) {
       _errorMessage = _mapError(e.toString());
     } finally {

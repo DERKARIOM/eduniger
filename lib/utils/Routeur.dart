@@ -8,7 +8,11 @@ import 'package:flutter/cupertino.dart';
 import '../features/lecteur_audio/views/lecteur_audio_view.dart';
 import '../features/lecteur_pdf/views/lecteur_pdf_view.dart';
 import '../features/livres/views/detail_book_view.dart';
+import '../features/livres/views/livre.dart';
 import '../features/notification/views/notification_view.dart';
+import '../features/structures/views/detaille_structure.dart';
+import '../features/structures/views/livre_structure_view.dart';
+import '../features/structures/views/structure.dart';
 import '../features/utilisateurs/views/user_view_login.dart';
 
 
@@ -29,7 +33,10 @@ abstract class Routeur {
     '/lecteur_audio' : (_) => const LecteurAudioView(),
     '/lecteur_pdf'   : (_) => const LecteurPdfView(),
     '/notification' : (_) => const NotificationView(),
-
+    '/detaille_structure' : (_) => DetailleStructure(),
+      '/livre_structure' : (_) => const Livre_Stricture(),
+    '/livres' : (_) => const Livre(),
+    '/structures' : (_) => const StructurePage(),
 
   };
 

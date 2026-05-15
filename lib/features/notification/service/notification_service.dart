@@ -12,6 +12,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../localDataBase/sqlflitEduniger.dart';
 import '../model/notification_model.dart';
+import 'badje_service.dart';
 import 'navigation_service.dart';
 // ── Handler background (obligatoire top-level function) ──────────────────
 /*
@@ -291,6 +292,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage msg) async {
   await DatabaseHelper.instance.inserer(
     NotificationModel.fromRemoteMessage(msg, numero),
   );
+  final nonLues = await DatabaseHelper.instance.compterNonLues(numero);
+  await BadgeService.instance.mettreAJour(nonLues);
+
   debugPrint('📩 BG sauvegardé [${msg.data['type']}] : $titre');
 }
 
@@ -438,6 +442,12 @@ class NotificationService {
     await DatabaseHelper.instance.inserer(
       NotificationModel.fromRemoteMessage(msg, _numeroUser),
     );
+
+
+    // ✅ Mettre à jour le badge après sauvegarde
+    final nonLues = await DatabaseHelper.instance.compterNonLues(_numeroUser);
+    await BadgeService.instance.mettreAJour(nonLues);
+
     onNouvelleNotification?.call();
     debugPrint('✅ Sauvegardé [type:${d['type']}] "$titre" → user:$_numeroUser');
   }
@@ -453,18 +463,29 @@ class NotificationService {
           ? Future.value(0)
           : DatabaseHelper.instance.compterNonLues(_numeroUser);
 
-  Future<void> marquerCommeLue(String id) =>
-      DatabaseHelper.instance.marquerLue(id, _numeroUser);
+ // Future<void> marquerCommeLue(String id) =>DatabaseHelper.instance.marquerLue(id, _numeroUser);
+  Future<void> marquerCommeLue(String id) async {
+    await DatabaseHelper.instance.marquerLue(id, _numeroUser);
+    // ✅ Recalculer et mettre à jour le badge
+    final nonLues = await DatabaseHelper.instance.compterNonLues(_numeroUser);
+    await BadgeService.instance.mettreAJour(nonLues);
+  }
+  Future<void> toutMarquerLues() async {
+    await DatabaseHelper.instance.toutMarquerLues(_numeroUser);
+    //await BadgeService.instance.effacer(); // ✅ plus aucune non-lue → badge à 0
+  }
 
-  Future<void> toutMarquerLues() =>
-      DatabaseHelper.instance.toutMarquerLues(_numeroUser);
+  Future<void> supprimerNotification(String id) async {
+    await DatabaseHelper.instance.supprimer(id, _numeroUser);
+    // ✅ Recalculer après suppression
+    final nonLues = await DatabaseHelper.instance.compterNonLues(_numeroUser);
+    await BadgeService.instance.mettreAJour(nonLues);
+  }
 
-  Future<void> supprimerNotification(String id) =>
-      DatabaseHelper.instance.supprimer(id, _numeroUser);
-
-  Future<void> toutEffacer() =>
-      DatabaseHelper.instance.toutEffacer(_numeroUser);
-
+  Future<void> toutEffacer() async {
+    await DatabaseHelper.instance.toutEffacer(_numeroUser);
+    await BadgeService.instance.effacer(); // ✅ badge à 0
+  }
   // ── HANDLERS PRIVÉS ───────────────────────────────────────────────────────
   Future<void> _onForeground(RemoteMessage msg) async {
     debugPrint('📩 Foreground | title:${msg.data['title']} type:${msg.data['type']}');
@@ -495,8 +516,10 @@ class NotificationService {
     final type = data['type']?.toString() ?? '';
     debugPrint('📌 Navigation type=$type');
     switch (type) {
+      /*
       case '1' : NavigationService.versRoute('/cours',    arguments: data); break;
       case '2' : NavigationService.versRoute('/messages', arguments: data); break;
+    */
       default  : NavigationService.versNotifications();
     }
   }

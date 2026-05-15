@@ -429,7 +429,9 @@ class _AccueilPageState extends State<AccueilView> {
   // ══════════════════════════════════════════════════════════════════════
   Widget _sectionLivresRecomandes(AccueilViewModel vm) {
     return Column(children: [
-      _entete('Recommandés', onVoirPlus: () {}),
+      _entete('Recommandés', onVoirPlus: () {
+        Navigator.pushNamed(context, '/livres');
+      }),
       vm.livresRecomandes.isEmpty
           ? _sectionVide('Aucun livre recommandé pour le moment')
           : SizedBox(
@@ -500,6 +502,7 @@ class _AccueilPageState extends State<AccueilView> {
 
     return Column(children: [
       _entete('Structures', onVoirPlus: () {
+        Navigator.pushNamed(context, '/structures');
 
       }),
       vm.structures.isEmpty
@@ -512,7 +515,15 @@ class _AccueilPageState extends State<AccueilView> {
           final Structure s = vm.structures[index];
           int index2 = int.tryParse(s.id.toString()) ?? 0;
           return ListTile(
-
+            onTap: (){
+              Navigator.pushNamed(
+                context, '/detaille_structure',
+                arguments: {
+                  'id': s,
+                  // 'numero': context.read<AppState>().numeroUtilisateur,
+                },
+              );
+            },
             contentPadding: const EdgeInsets.symmetric(
                 horizontal: 4, vertical: 8),
             leading: CircleAvatar(

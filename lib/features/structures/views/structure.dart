@@ -46,9 +46,20 @@ class _StructureState extends State<StructurePage> {
           //physics: const NeverScrollableScrollPhysics(), // Empêche cette ListView de défiler (le SingleChildScrollView s'en charge)
           itemCount: vm.structures.length,
           itemBuilder: (context, index) {
+            final struct = vm.structures[index];
+
             return Container(
               // Le ListTile est plus adapté pour ce layout
               child: ListTile(
+                onTap: (){
+                  Navigator.pushNamed(
+                    context, '/detaille_structure',
+                    arguments: {
+                      'id': struct,
+                     // 'numero': context.read<AppState>().numeroUtilisateur,
+                    },
+                  );
+                },
                 contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 leading: CircleAvatar(
                   radius: 35, // Augmenté pour un meilleur aspect

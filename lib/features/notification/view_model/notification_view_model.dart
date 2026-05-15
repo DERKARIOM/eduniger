@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../appstate.dart';
 import '../model/notification_model.dart';
+import '../service/badje_service.dart';
 import '../service/notification_service.dart';
 import 'package:flutter/material.dart';
 class NotificationViewModel extends ChangeNotifier {
@@ -41,6 +42,8 @@ class NotificationViewModel extends ChangeNotifier {
 
       // 3. Charger les notifs existantes depuis SQLite
       await chargerNotifications();
+      await BadgeService.instance.mettreAJour(_nonLues);
+
     } catch (e) {
       debugPrint('⚠️ Init notifs : $e');
     } finally {
@@ -69,6 +72,7 @@ class NotificationViewModel extends ChangeNotifier {
     await NotificationService.instance.toutMarquerLues();
     for (final n in _notifications) { n.estLue = true; }
     _nonLues = 0;
+    await BadgeService.instance.effacer();
     notifyListeners();
   }
 
